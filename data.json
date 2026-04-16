@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "project": "Energy Savings Calculator",
+    "description": "Dataset using only real extracted values, structured for Phase 3 calculations.",
+    "notes": "Water consumption has been aggregated into daily totals based on real hourly charts."
+  },
+
+  "water_consumption_daily": [
+    {
+      "date": "2024-02-25",
+      "total_liters": 4320,
+      "source": "hourly chart",
+      "notes": "Daily total reconstructed from real hourly bars"
+    },
+    {
+      "date": "2024-02-28",
+      "total_liters": 6850,
+      "source": "hourly chart",
+      "notes": "Daily total reconstructed from real hourly bars"
+    },
+    {
+      "date": "2024-02-29",
+      "total_liters": 5920,
+      "source": "hourly chart",
+      "notes": "Daily total reconstructed from real hourly bars"
+    }
+  ],
+
+  "electricity_generation": [
+    { "date": "2025-01-01", "pv_yield_kWh": 42.56, "consumption_kWh": 157.47, "self_consumption_kWh": 39.94, "import_kWh": 117.53 },
+    { "date": "2025-01-02", "pv_yield_kWh": 48.86, "consumption_kWh": 159.55, "self_consumption_kWh": 45.43, "import_kWh": 114.12 },
+    { "date": "2025-01-03", "pv_yield_kWh": 36.48, "consumption_kWh": 189.50, "self_consumption_kWh": 36.26, "import_kWh": 153.24 },
+    { "date": "2025-01-04", "pv_yield_kWh": 44.18, "consumption_kWh": 201.76, "self_consumption_kWh": 43.75, "import_kWh": 158.01 },
+    { "date": "2025-01-05", "pv_yield_kWh": 41.99, "consumption_kWh": 199.49, "self_consumption_kWh": 41.85, "import_kWh": 157.64 }
+  ],
+
+  "office_consumables": [
+    { "date": "2024-06-19", "product": "Whiteboard marker refill (black)", "category": "markers", "quantity": 40, "total_price": 28.40 },
+    { "date": "2024-06-04", "product": "Whiteboard marker refill (green)", "category": "markers", "quantity": 30, "total_price": 27.30 },
+    { "date": "2024-06-04", "product": "Whiteboard marker refill (blue)", "category": "markers", "quantity": 40, "total_price": 28.40 },
+    { "date": "2024-06-04", "product": "Paper A4 500H", "category": "paper", "quantity": 30, "total_price": 160.20 },
+    { "date": "2024-10-16", "product": "Paper A4 500H", "category": "paper", "quantity": 20, "total_price": 109.40 },
+    { "date": "2024-11-07", "product": "Paper A4 500H", "category": "paper", "quantity": 10, "total_price": 54.70 }
+  ],
+
+  "cleaning_consumables": [
+    { "date": "2024-06-20", "product": "Industrial sacks", "category": "cleaning supplies", "quantity": 20, "total_price": 30.20 },
+    { "date": "2024-06-20", "product": "Small trash bags", "category": "cleaning supplies", "quantity": 30, "total_price": 33.90 },
+    { "date": "2024-06-20", "product": "Industrial toilet paper rolls", "category": "cleaning supplies", "quantity": 10, "total_price": 256.70 },
+    { "date": "2024-06-20", "product": "Paper towel rolls", "category": "cleaning supplies", "quantity": 5, "total_price": 91.25 },
+    { "date": "2024-06-20", "product": "Hand soap (5L)", "category": "cleaning supplies", "quantity": 3, "total_price": 25.50 }
+  ],
+
+  "services": [
+    { "date": "2024-05-01", "service": "Fiber 1Gb monthly service", "category": "telecom_energy", "total_price": 30.00 },
+    { "date": "2024-02-17", "service": "Fiber 1Gb + Mobile 200GB", "category": "telecom_energy", "total_price": 50.00 },
+    { "date": "2024-05-23", "service": "Electrical services", "category": "electrical", "total_price": 1986.00 },
+    { "date": "2024-07-05", "service": "Emergency air-conditioning repair", "category": "HVAC", "total_price": 288.00 },
+    { "date": "2024-09-13", "service": "Metal & carpentry repair", "category": "carpentry", "total_price": 575.00 },
+    { "date": "2024-05-27", "service": "Outdoor cleaning services", "category": "cleaning", "total_price": 375.80 }
+  ]
+}

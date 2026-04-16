@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Energy & Sustainability Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <h1>Energy & Sustainability Calculator</h1>
+    <p>School-year sustainability analysis: electricity, water, office and cleaning consumables, services and CO₂.</p>
+</header>
+
+<main>
+    <section class="card">
+        <h2>Global options</h2>
+        <div class="controls">
+            <label>
+                <input type="checkbox" id="applyIPC">
+                Apply IPC (+3% yearly) to monetary projections
+            </label>
+        </div>
+        <div class="controls">
+            <label>
+                <input type="checkbox" id="applySeasonal">
+                Apply seasonal trends and temporal variability
+            </label>
+        </div>
+    </section>
+
+    <!-- ELECTRICITY -->
+    <section id="electricity" class="card">
+        <h2>Electricity Consumption</h2>
+
+        <div class="controls">
+            <button onclick="calculateElectricityYear()">Projected electricity for next year</button>
+        </div>
+
+        <div class="controls">
+            <label>From: <input type="date" id="elecStart" value="2024-09-01"></label>
+            <label>To: <input type="date" id="elecEnd" value="2025-06-30"></label>
+            <button onclick="calculateElectricityPeriod()">Electricity in selected period</button>
+        </div>
+
+        <div id="electricityResult" class="result"></div>
+    </section>
+
+    <!-- WATER -->
+    <section id="water" class="card">
+        <h2>Water Consumption</h2>
+
+        <div class="controls">
+            <button onclick="calculateWaterYear()">Projected water consumption for next year</button>
+        </div>
+
+        <div class="controls">
+            <label>From: <input type="date" id="waterStart" value="2024-02-25"></label>
+            <label>To: <input type="date" id="waterEnd" value="2024-02-29"></label>
+            <button onclick="calculateWaterPeriod()">Water consumption in selected period</button>
+        </div>
+
+        <div id="waterResult" class="result"></div>
+    </section>
+
+    <!-- OFFICE CONSUMABLES -->
+    <section id="office" class="card">
+        <h2>Office Consumables</h2>
+
+        <div class="controls">
+            <button onclick="calculateOfficeYear()">Projected office consumables for next year</button>
+        </div>
+
+        <div class="controls">
+            <label>From: <input type="date" id="officeStart" value="2024-06-01"></label>
+            <label>To: <input type="date" id="officeEnd" value="2024-12-31"></label>
+            <button onclick="calculateOfficePeriod()">Office consumables in selected period</button>
+        </div>
+
+        <div id="officeResult" class="result"></div>
+    </section>
+
+    <!-- CLEANING CONSUMABLES -->
+    <section id="cleaning" class="card">
+        <h2>Cleaning Consumables</h2>
+
+        <div class="controls">
+            <button onclick="calculateCleaningYear()">Projected cleaning consumables for next year</button>
+        </div>
+
+        <div class="controls">
+            <label>From: <input type="date" id="cleaningStart" value="2024-06-01"></label>
+            <label>To: <input type="date" id="cleaningEnd" value="2024-12-31"></label>
+            <button onclick="calculateCleaningPeriod()">Cleaning consumables in selected period</button>
+        </div>
+
+        <div id="cleaningResult" class="result"></div>
+    </section>
+
+    <!-- SERVICES -->
+    <section id="services" class="card">
+        <h2>Services (Energy & Maintenance)</h2>
+
+        <div class="controls">
+            <button onclick="calculateServicesYear()">Projected services cost for next year</button>
+        </div>
+
+        <div class="controls">
+            <label>From: <input type="date" id="servicesStart" value="2024-01-01"></label>
+            <label>To: <input type="date" id="servicesEnd" value="2024-12-31"></label>
+            <button onclick="calculateServicesPeriod()">Services cost in selected period</button>
+        </div>
+
+        <div id="servicesResult" class="result"></div>
+    </section>
+
+    <!-- CO2 -->
+    <section id="co2" class="card">
+        <h2>Carbon Footprint (Electricity)</h2>
+
+        <div class="controls">
+            <button onclick="calculateCO2()">Estimate yearly CO₂ from electricity</button>
+        </div>
+
+        <div id="co2Result" class="result"></div>
+    </section>
+    <section id="tips" class="card">
+        <h2>How to reduce consumption</h2>
+
+        <h3>Electricity</h3>
+        <ul>
+            <li>Use LED lighting and switch off unused equipment.</li>
+            <li>Adjust heating and cooling setpoints by 1–2 ºC.</li>
+            <li>Schedule high-consumption tasks during daylight to maximize solar use.</li>
+        </ul>
+
+        <h3>Water</h3>
+        <ul>
+            <li>Install aerators on taps and low-flow fixtures.</li>
+            <li>Detect and repair leaks quickly.</li>
+            <li>Reduce irrigation and prioritize native plants.</li>
+        </ul>
+
+        <h3>Office consumables</h3>
+        <ul>
+            <li>Print only when necessary and use double-sided printing.</li>
+            <li>Promote digital documents instead of paper.</li>
+            <li>Reuse scrap paper for drafts and notes.</li>
+        </ul>
+
+        <h3>Cleaning consumables & services</h3>
+        <ul>
+            <li>Use concentrated and eco-labelled cleaning products.</li>
+            <li>Optimize cleaning schedules based on real occupancy.</li>
+            <li>Plan preventive maintenance to avoid inefficient equipment.</li>
+        </ul>
+    </section>
+</main>
+
+<footer>
+    <p>Projecte de sostenibilitat · Phase 3</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
