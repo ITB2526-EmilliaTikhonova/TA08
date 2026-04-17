@@ -1,94 +1,174 @@
+/* =========================================
+   VARIABLES: TEMA "FRESH TECH" V2
+   ========================================= */
+:root {
+  /* Tu nueva paleta exacta */
+  --cyan-main: #79FCF5;
+  --blue-soft: #ABE4FF;    /* <-- Tu nuevo color actualizado */
+  --bg-ice: #E8F8FF;
+  --bg-soft: #E8F0FC;
+  --white: #FFFFFF;
+  --black: #0f172a; /* Negro azulado para máxima elegancia y legibilidad */
+
+  /* Colores derivados para estructura */
+  --text-muted: #475569;
+
+  /* Tipografía y formas */
+  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --container-width: 1100px;
+  --radius: 16px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =========================================
+   BASE & ESTRUCTURA
+   ========================================= */
 * {
-    box-sizing: border-box;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    margin: 0;
-    background: #f4f6f9;
-    color: #222;
+  background-color: var(--bg-ice);
+  color: var(--black);
+  font-family: var(--font-main);
+  line-height: 1.6;
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* =========================================
+   HEADER
+   ========================================= */
 header {
-    background: #1f4f7b;
-    color: #fff;
-    padding: 1.5rem 2rem;
+  width: 100%;
+  max-width: var(--container-width);
+  margin-bottom: 4rem;
+  text-align: center;
 }
 
-header h1 {
-    margin: 0 0 0.3rem;
+h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--black);
+  margin-bottom: 0.5rem;
 }
 
-header p {
-    margin: 0;
-    opacity: 0.9;
+/* Subrayado decorativo ahora fluye del cian a tu nuevo azul suave */
+h1::after {
+  content: '';
+  display: block;
+  width: 80px;
+  height: 6px;
+  background: linear-gradient(90deg, var(--cyan-main), var(--blue-soft));
+  margin: 1rem auto 0;
+  border-radius: 4px;
 }
 
-main {
-    max-width: 1100px;
-    margin: 1.5rem auto 2rem;
-    padding: 0 1rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1.5rem;
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* =========================================
+   GRID Y TARJETAS
+   ========================================= */
+#container, .grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: var(--container-width);
 }
 
 .card {
-    background: #fff;
-    border-radius: 8px;
-    padding: 1.2rem 1.4rem;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 2.5rem 2rem;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid var(--white);
+  box-shadow: 0 4px 6px rgba(232, 240, 252, 0.5), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Detalle superior en la tarjeta */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: var(--bg-soft);
+  transition: var(--transition);
+}
+
+/* Efecto Hover */
+.card:hover {
+  transform: translateY(-5px);
+  border-color: var(--blue-soft); /* El borde ahora toma tu nuevo color azul */
+  box-shadow: 0 20px 25px -5px rgba(171, 228, 255, 0.3), 0 10px 10px -5px rgba(121, 252, 245, 0.1);
+}
+
+/* El degradado de la barra superior al hacer hover */
+.card:hover::before {
+  background: linear-gradient(90deg, var(--cyan-main), var(--blue-soft));
 }
 
 .card h2 {
-    margin-top: 0;
-    margin-bottom: 0.8rem;
-    color: #1f4f7b;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
 }
 
-.controls {
-    margin-bottom: 0.8rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
+.card p {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
 }
 
-label {
-    font-size: 0.9rem;
-}
-
-input[type="date"] {
-    padding: 0.2rem 0.3rem;
-    font-size: 0.9rem;
-}
-
-button {
-    padding: 0.4rem 0.8rem;
-    border-radius: 4px;
-    border: none;
-    background: #1f4f7b;
-    color: #fff;
-    cursor: pointer;
-    font-size: 0.9rem;
+/* =========================================
+   BOTONES
+   ========================================= */
+button, .btn {
+  /* Gradiente más suave combinando el cian con el azul cielo */
+  background: linear-gradient(135deg, var(--cyan-main), var(--blue-soft));
+  color: var(--black);
+  border: none;
+  padding: 0.8rem 1.8rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-block;
+  width: fit-content;
+  box-shadow: 0 4px 10px rgba(171, 228, 255, 0.5); /* Sombra adaptada al nuevo azul */
 }
 
 button:hover {
-    background: #163a5a;
+  background: var(--black);
+  color: var(--cyan-main);
+  box-shadow: 0 6px 15px rgba(15, 23, 42, 0.2);
+  transform: translateY(-2px);
 }
 
-.result {
-    margin-top: 0.6rem;
-    font-size: 0.9rem;
-    background: #f7fafc;
-    border-radius: 4px;
-    padding: 0.6rem 0.7rem;
-    border: 1px solid #e0e6ee;
-}
-
-footer {
-    text-align: center;
-    padding: 1rem;
-    font-size: 0.8rem;
-    color: #555;
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+@media (max-width: 600px) {
+  h1 { font-size: 2.5rem; }
+  body { padding: 2rem 1.5rem; }
+  .card { padding: 1.5rem; }
 }
