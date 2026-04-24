@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Sostenibilidad - Calculadora Energética</title>
+    <title>Sustainability Dashboard - Energy Calculator</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
     <header class="main-header">
-        <h1>Calculadora de Impacto y Sostenibilidad</h1>
-        <p>Análisis de consumo, aplicación de IPC e impacto de medidas de reducción a 3 años.</p>
+        <h1>Impact and Sustainability Calculator</h1>
+        <p>Consumption analysis, CPI application, and impact of reduction measures over 3 years.</p>
     </header>
 
     <main class="dashboard">
@@ -19,135 +19,142 @@
         <section class="config-card full-width">
             <div class="config-content">
                 <div class="ipc-group">
-                    <label>📈 Inflación / IPC Anual estimado:</label>
+                    <label>📈 Estimated Annual Inflation / CPI:</label>
                     <input type="number" id="ipc" value="3.0" step="0.1"> %
                 </div>
-                <button id="loadDefaults" class="btn-secondary">Cargar datos base (JSON)</button>
             </div>
         </section>
 
         <div class="calculator-grid">
 
             <div class="card" id="card_elect">
-                <h2>⚡ Consumo Eléctrico</h2>
+                <h2>⚡ Electricity Consumption</h2>
                 <select class="period-select">
-                    <option value="12">Próximo Año (12 meses)</option>
-                    <option value="10">Período Escolar (Sept-Jun, 10 meses)</option>
+                    <option value="12">Next Year (12 months)</option>
+                    <option value="10">School Period (Sept-Jun, 10 months)</option>
                 </select>
                 <div class="input-row">
-                    <input type="number" class="base-input" min="0" placeholder="Consumo mensual">
+                    <input type="number" class="base-input" min="0" placeholder="Monthly consumption">
                     <select class="unit-select">
                         <option value="1">kWh</option>
                         <option value="0.001">MWh</option>
                     </select>
                 </div>
                 <div class="tips-box">
-                    <strong>💡 Cómo reducir:</strong> Aprovechar luz natural, apagar equipos en stand-by y ajustar climatización según estacionalidad.
+                    <strong>💡 How to reduce:</strong> Maximize natural light, turn off stand-by equipment, and adjust HVAC based on the season.
                 </div>
                 <div class="reduction-options">
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.15"> LED + Placas Solares</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Termostatos Inteligentes</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.15"> LED + Solar Panels</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Smart Thermostats</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Motion Sensors (Lighting)</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.08"> HVAC Insulation</label>
                 </div>
                 <div class="chart-container"><canvas id="chart_elect"></canvas></div>
-                <div class="res-box">Esperando datos...</div>
+                <div class="res-box">Waiting for data...</div>
             </div>
 
             <div class="card" id="card_water">
-                <h2>💧 Consumo de Agua</h2>
+                <h2>💧 Water Consumption</h2>
                 <select class="period-select">
-                    <option value="12">Próximo Año (12 meses)</option>
-                    <option value="10">Período Escolar (Sept-Jun, 10 meses)</option>
+                    <option value="12">Next Year (12 months)</option>
+                    <option value="10">School Period (Sept-Jun, 10 months)</option>
                 </select>
                 <div class="input-row">
-                    <input type="number" class="base-input" min="0" placeholder="Consumo mensual">
+                    <input type="number" class="base-input" min="0" placeholder="Monthly consumption">
                     <select class="unit-select">
                         <option value="1">m³</option>
-                        <option value="1000">Litros</option>
+                        <option value="1000">Liters</option>
                     </select>
                 </div>
                 <div class="tips-box">
-                    <strong>💡 Cómo reducir:</strong> Instalar difusores en grifos, revisar fugas periódicamente y concienciación del alumnado.
+                    <strong>💡 How to reduce:</strong> Install faucet aerators, regularly check for leaks, and raise student awareness.
                 </div>
                 <div class="reduction-options">
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.20"> Doble Descarga y Aireadores</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Reciclaje Aguas Grises</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.20"> Dual Flush and Aerators</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Greywater Recycling</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Xeriscaping (Auto-irrigation)</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Leak Detection Sensors</label>
                 </div>
                 <div class="chart-container"><canvas id="chart_water"></canvas></div>
-                <div class="res-box">Esperando datos...</div>
+                <div class="res-box">Waiting for data...</div>
             </div>
 
             <div class="card" id="card_office">
-                <h2>📎 Consumibles de Oficina</h2>
+                <h2>📎 Office Supplies</h2>
                 <select class="period-select">
-                    <option value="12">Próximo Año (12 meses)</option>
-                    <option value="10">Período Escolar (Sept-Jun, 10 meses)</option>
+                    <option value="12">Next Year (12 months)</option>
+                    <option value="10">School Period (Sept-Jun, 10 months)</option>
                 </select>
                 <div class="input-row">
-                    <input type="number" class="base-input" min="0" placeholder="Gasto mensual">
+                    <input type="number" class="base-input" min="0" placeholder="Monthly expense">
                     <div class="unit-static">€ (Euros)</div>
                     <input type="hidden" class="unit-select" value="1">
                 </div>
                 <div class="tips-box">
-                    <strong>💡 Cómo reducir:</strong> Fomentar entregas digitales, imprimir a doble cara y reutilizar material.
+                    <strong>💡 How to reduce:</strong> Promote digital submissions, print double-sided, and reuse materials.
                 </div>
                 <div class="reduction-options">
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Política "Cero Papel"</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Recarga de marcadores</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> "Zero Paper" Policy</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Marker Refills</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Digital-Only Submissions</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Shared Resource Station</label>
                 </div>
                 <div class="chart-container"><canvas id="chart_office"></canvas></div>
-                <div class="res-box">Esperando datos...</div>
+                <div class="res-box">Waiting for data...</div>
             </div>
 
             <div class="card" id="card_clean">
-                <h2>🧹 Productos de Limpieza</h2>
+                <h2>🧹 Cleaning Products</h2>
                 <select class="period-select">
-                    <option value="12">Próximo Año (12 meses)</option>
-                    <option value="10">Período Escolar (Sept-Jun, 10 meses)</option>
+                    <option value="12">Next Year (12 months)</option>
+                    <option value="10">School Period (Sept-Jun, 10 months)</option>
                 </select>
                 <div class="input-row">
-                    <input type="number" class="base-input" min="0" placeholder="Gasto mensual">
+                    <input type="number" class="base-input" min="0" placeholder="Monthly expense">
                     <div class="unit-static">€ (Euros)</div>
                     <input type="hidden" class="unit-select" value="1">
                 </div>
                 <div class="tips-box">
-                    <strong>💡 Cómo reducir:</strong> Comprar a granel (eco-bulk), usar concentrados y optimizar dosis.
+                    <strong>💡 How to reduce:</strong> Buy in bulk (eco-bulk), use concentrates, and optimize dosing.
                 </div>
                 <div class="reduction-options">
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.15"> Dilución de concentrados</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Compra Granel (Eco-Bulk)</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.15"> Dilution of Concentrates</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Bulk Buying (Eco-Bulk)</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.08"> Microfiber Cloths (No chemicals)</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.07"> Automated Dosing Systems</label>
                 </div>
                 <div class="chart-container"><canvas id="chart_clean"></canvas></div>
-                <div class="res-box">Esperando datos...</div>
+                <div class="res-box">Waiting for data...</div>
             </div>
 
         </div>
 
         <section class="reduction-plan full-width">
-            <h2>Cronograma de Reducción a 3 años (-30% Objetivo)</h2>
+            <h2>3-Year Reduction Timeline (-30% Goal)</h2>
             <div class="plan-details">
                 <table class="plan-table">
                     <thead>
                         <tr>
-                            <th>Año</th>
-                            <th>Objetivo Mesurable</th>
-                            <th>Acciones Concretas</th>
+                            <th>Year</th>
+                            <th>Measurable Goal</th>
+                            <th>Concrete Actions</th>
                         </tr>
                     </thead>
                     <tbody id="plan-body">
                         <tr>
-                            <td>Año 1</td>
-                            <td>Reducción del 10% del impacto</td>
-                            <td>Instalación de LED, aireadores y política digital básica.</td>
+                            <td>Year 1</td>
+                            <td>10% impact reduction</td>
+                            <td>Installation of LEDs, aerators, and basic digital policy.</td>
                         </tr>
                         <tr>
-                            <td>Año 2</td>
-                            <td>Reducción acumulada del 20%</td>
-                            <td>Compra a granel, termostatos y recarga de consumibles.</td>
+                            <td>Year 2</td>
+                            <td>Cumulative 20% reduction</td>
+                            <td>Bulk buying, smart thermostats, and supply refills.</td>
                         </tr>
                         <tr>
-                            <td>Año 3</td>
-                            <td>Reducción acumulada del 30%</td>
-                            <td>Placas solares y reciclaje de aguas grises (Economía circular).</td>
+                            <td>Year 3</td>
+                            <td>Cumulative 30% reduction</td>
+                            <td>Solar panels and greywater recycling (Circular economy).</td>
                         </tr>
                     </tbody>
                 </table>
