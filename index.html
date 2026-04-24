@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sustainability Dashboard - Energy Calculator</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -26,108 +26,107 @@
         </section>
 
         <div class="calculator-grid">
-
-            <div class="card" id="card_elect">
-                <h2>⚡ Electricity Consumption</h2>
-                <select class="period-select">
-                    <option value="12">Next Year (12 months)</option>
-                    <option value="10">School Period (Sept-Jun, 10 months)</option>
-                </select>
-                <div class="input-row">
-                    <input type="number" class="base-input" min="0" placeholder="Monthly consumption">
-                    <select class="unit-select">
-                        <option value="1">kWh</option>
-                        <option value="0.001">MWh</option>
-                    </select>
-                </div>
-                <div class="tips-box">
-                    <strong>💡 How to reduce:</strong> Maximize natural light, turn off stand-by equipment, and adjust HVAC based on the season.
-                </div>
-                <div class="reduction-options">
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.15"> LED + Solar Panels</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Smart Thermostats</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Motion Sensors (Lighting)</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.08"> HVAC Insulation</label>
-                </div>
-                <div class="chart-container"><canvas id="chart_elect"></canvas></div>
-                <div class="res-box">Waiting for data...</div>
-            </div>
-
-            <div class="card" id="card_water">
-                <h2>💧 Water Consumption</h2>
-                <select class="period-select">
-                    <option value="12">Next Year (12 months)</option>
-                    <option value="10">School Period (Sept-Jun, 10 months)</option>
-                </select>
-                <div class="input-row">
-                    <input type="number" class="base-input" min="0" placeholder="Monthly consumption">
-                    <select class="unit-select">
-                        <option value="1">m³</option>
-                        <option value="1000">Liters</option>
-                    </select>
-                </div>
-                <div class="tips-box">
-                    <strong>💡 How to reduce:</strong> Install faucet aerators, regularly check for leaks, and raise student awareness.
-                </div>
-                <div class="reduction-options">
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.20"> Dual Flush and Aerators</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Greywater Recycling</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Xeriscaping (Auto-irrigation)</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Leak Detection Sensors</label>
-                </div>
-                <div class="chart-container"><canvas id="chart_water"></canvas></div>
-                <div class="res-box">Waiting for data...</div>
-            </div>
-
-            <div class="card" id="card_office">
-                <h2>📎 Office Supplies</h2>
-                <select class="period-select">
-                    <option value="12">Next Year (12 months)</option>
-                    <option value="10">School Period (Sept-Jun, 10 months)</option>
-                </select>
-                <div class="input-row">
-                    <input type="number" class="base-input" min="0" placeholder="Monthly expense">
-                    <div class="unit-static">€ (Euros)</div>
-                    <input type="hidden" class="unit-select" value="1">
-                </div>
-                <div class="tips-box">
-                    <strong>💡 How to reduce:</strong> Promote digital submissions, print double-sided, and reuse materials.
-                </div>
-                <div class="reduction-options">
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> "Zero Paper" Policy</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Marker Refills</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Digital-Only Submissions</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Shared Resource Station</label>
-                </div>
-                <div class="chart-container"><canvas id="chart_office"></canvas></div>
-                <div class="res-box">Waiting for data...</div>
-            </div>
-
-            <div class="card" id="card_clean">
-                <h2>🧹 Cleaning Products</h2>
-                <select class="period-select">
-                    <option value="12">Next Year (12 months)</option>
-                    <option value="10">School Period (Sept-Jun, 10 months)</option>
-                </select>
-                <div class="input-row">
-                    <input type="number" class="base-input" min="0" placeholder="Monthly expense">
-                    <div class="unit-static">€ (Euros)</div>
-                    <input type="hidden" class="unit-select" value="1">
-                </div>
-                <div class="tips-box">
-                    <strong>💡 How to reduce:</strong> Buy in bulk (eco-bulk), use concentrates, and optimize dosing.
-                </div>
-                <div class="reduction-options">
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.15"> Dilution of Concentrates</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Bulk Buying (Eco-Bulk)</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.08"> Microfiber Cloths (No chemicals)</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.07"> Automated Dosing Systems</label>
-                </div>
-                <div class="chart-container"><canvas id="chart_clean"></canvas></div>
-                <div class="res-box">Waiting for data...</div>
-            </div>
-
+    <div class="card" id="card_elect">
+        <h2>⚡ Electricity Consumption</h2>
+        <select class="period-select">
+            <option value="12">Next Year (12 months)</option>
+            <option value="10">School Period (Sept-Jun, 10 months)</option>
+        </select>
+        <div class="input-row">
+            <input type="number" class="base-input" min="0" placeholder="Monthly consumption">
+            <select class="unit-select">
+                <option value="1">kWh</option>
+                <option value="0.001">MWh</option>
+            </select>
         </div>
+        <div class="reduction-options">
+            <label><input type="checkbox" class="reduce-check" data-impact="0.15"> LED + Solar Panels <span class="impact-tag">(-15%)</span></label>
+            <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Smart Thermostats <span class="impact-tag">(-10%)</span></label>
+            <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Motion Sensors <span class="impact-tag">(-5%)</span></label>
+            <label><input type="checkbox" class="reduce-check" data-impact="0.08"> HVAC Insulation <span class="impact-tag">(-8%)</span></label>
+        </div>
+        <div class="category-res-info">Category Reduction: <span class="cat-perc">0%</span></div>
+        <div class="chart-container"><canvas id="chart_elect"></canvas></div>
+        <div class="res-box">Waiting for data...</div>
+    </div>
+
+    <div class="card" id="card_water">
+        <h2>💧 Water Consumption</h2>
+        <select class="period-select">
+            <option value="12">Next Year (12 months)</option>
+            <option value="10">School Period (Sept-Jun, 10 months)</option>
+        </select>
+        <div class="input-row">
+            <input type="number" class="base-input" min="0" placeholder="Monthly consumption">
+            <select class="unit-select">
+                <option value="1">m³</option>
+                <option value="1000">Liters</option>
+            </select>
+        </div>
+        <div class="reduction-options">
+            <label><input type="checkbox" class="reduce-check" data-impact="0.20"> Dual Flush and Aerators <span class="impact-tag">(-20%)</span></label>
+            <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Greywater Recycling <span class="impact-tag">(-10%)</span></label>
+            <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Xeriscaping <span class="impact-tag">(-10%)</span></label>
+            <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Leak Detection Sensors <span class="impact-tag">(-5%)</span></label>
+        </div>
+        <div class="category-res-info">Category Reduction: <span class="cat-perc">0%</span></div>
+        <div class="chart-container"><canvas id="chart_water"></canvas></div>
+        <div class="res-box">Waiting for data...</div>
+    </div>
+
+    <div class="card" id="card_office">
+        <h2>📎 Office Supplies</h2>
+        <select class="period-select">
+            <option value="12">Next Year (12 months)</option>
+            <option value="10">School Period (Sept-Jun, 10 months)</option>
+        </select>
+        <div class="input-row">
+            <input type="number" class="base-input" min="0" placeholder="Monthly expense">
+            <div class="unit-static">€ (Euros)</div>
+            <input type="hidden" class="unit-select" value="1">
+        </div>
+        <div class="reduction-options">
+            <label><input type="checkbox" class="reduce-check" data-impact="0.10"> "Zero Paper" Policy <span class="impact-tag">(-10%)</span></label>
+            <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Marker Refills <span class="impact-tag">(-5%)</span></label>
+            <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Digital-Only Submissions <span class="impact-tag">(-10%)</span></label>
+            <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Shared Resource Station <span class="impact-tag">(-5%)</span></label>
+        </div>
+        <div class="category-res-info">Category Reduction: <span class="cat-perc">0%</span></div>
+        <div class="chart-container"><canvas id="chart_office"></canvas></div>
+        <div class="res-box">Waiting for data...</div>
+    </div>
+
+    <div class="card" id="card_clean">
+        <h2>🧹 Cleaning Products</h2>
+        <select class="period-select">
+            <option value="12">Next Year (12 months)</option>
+            <option value="10">School Period (Sept-Jun, 10 months)</option>
+        </select>
+        <div class="input-row">
+            <input type="number" class="base-input" min="0" placeholder="Monthly expense">
+            <div class="unit-static">€ (Euros)</div>
+            <input type="hidden" class="unit-select" value="1">
+        </div>
+        <div class="reduction-options">
+            <label><input type="checkbox" class="reduce-check" data-impact="0.15"> Dilution of Concentrates <span class="impact-tag">(-15%)</span></label>
+            <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Bulk Buying (Eco-Bulk) <span class="impact-tag">(-10%)</span></label>
+            <label><input type="checkbox" class="reduce-check" data-impact="0.08"> Microfiber Cloths <span class="impact-tag">(-8%)</span></label>
+            <label><input type="checkbox" class="reduce-check" data-impact="0.07"> Automated Dosing <span class="impact-tag">(-7%)</span></label>
+        </div>
+        <div class="category-res-info">Category Reduction: <span class="cat-perc">0%</span></div>
+        <div class="chart-container"><canvas id="chart_clean"></canvas></div>
+        <div class="res-box">Waiting for data...</div>
+    </div>
+</div>
+
+        <section class="reduction-summary-box full-width">
+            <h3>📉 Global Impact Reduction</h3>
+            <div class="reduction-percentage" id="total-reduction-value">-0.0%</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+            <p id="reduction-message">Select measures above to reach the -30% goal in 3 years.</p>
+        </section>
 
         <section class="reduction-plan full-width">
             <h2>3-Year Reduction Roadmap (-30% Goal)</h2>
@@ -157,6 +156,6 @@
 
     </main>
 
-    <script src="script.js"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>
