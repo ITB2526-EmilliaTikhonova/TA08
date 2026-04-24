@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sustainability Dashboard - Grifols Style</title>
+    <title>Dashboard Sostenibilidad - Calculadora Energética</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
     <header class="main-header">
-        <h1>Sustainability Metrics & Projections</h1>
-        <p>Análisis profesional de impacto ambiental y tendencias de consumo basándose en datos reales.</p>
+        <h1>Calculadora de Impacto y Sostenibilidad</h1>
+        <p>Análisis de consumo, aplicación de IPC e impacto de medidas de reducción a 3 años.</p>
     </header>
 
     <main class="dashboard">
@@ -19,100 +19,138 @@
         <section class="config-card full-width">
             <div class="config-content">
                 <div class="ipc-group">
-                    <label>Ajuste de IPC actual:</label>
+                    <label>📈 Inflación / IPC Anual estimado:</label>
                     <input type="number" id="ipc" value="3.0" step="0.1"> %
                 </div>
-                <button id="loadDefaults" class="btn-secondary">Resetear a datos del JSON</button>
+                <button id="loadDefaults" class="btn-secondary">Cargar datos base (JSON)</button>
             </div>
         </section>
 
         <div class="calculator-grid">
 
-            <div class="card" data-type="energy">
-                <h2>⚡ Energy Consumption</h2>
+            <div class="card" id="card_elect">
+                <h2>⚡ Consumo Eléctrico</h2>
+                <select class="period-select">
+                    <option value="12">Próximo Año (12 meses)</option>
+                    <option value="10">Período Escolar (Sept-Jun, 10 meses)</option>
+                </select>
                 <div class="input-row">
-                    <input type="number" id="elect_base" min="0" placeholder="0">
-                    <select id="unit_elect">
+                    <input type="number" class="base-input" min="0" placeholder="Consumo mensual">
+                    <select class="unit-select">
                         <option value="1">kWh</option>
                         <option value="0.001">MWh</option>
                     </select>
                 </div>
+                <div class="tips-box">
+                    <strong>💡 Cómo reducir:</strong> Aprovechar luz natural, apagar equipos en stand-by y ajustar climatización según estacionalidad.
+                </div>
                 <div class="reduction-options">
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.15"> Instalación LED (+Placas Solares)</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.15"> LED + Placas Solares</label>
                     <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Termostatos Inteligentes</label>
                 </div>
-                <div class="res-box" id="res_elect">Calculando...</div>
+                <div class="chart-container"><canvas id="chart_elect"></canvas></div>
+                <div class="res-box">Esperando datos...</div>
             </div>
 
-            <div class="card" data-type="water">
-                <h2>💧 Water Usage</h2>
+            <div class="card" id="card_water">
+                <h2>💧 Consumo de Agua</h2>
+                <select class="period-select">
+                    <option value="12">Próximo Año (12 meses)</option>
+                    <option value="10">Período Escolar (Sept-Jun, 10 meses)</option>
+                </select>
                 <div class="input-row">
-                    <input type="number" id="agua_base" min="0" placeholder="0">
-                    <select id="unit_water">
+                    <input type="number" class="base-input" min="0" placeholder="Consumo mensual">
+                    <select class="unit-select">
                         <option value="1">m³</option>
                         <option value="1000">Litros</option>
                     </select>
                 </div>
-                <div class="reduction-options">
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.20"> Aireadores y Doble Descarga</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Reciclaje de Aguas Grises</label>
-                </div>
-                <div class="res-box" id="res_water">Calculando...</div>
-            </div>
-
-            <div class="card" data-type="office">
-                <h2>📎 Office Supplies</h2>
-                <div class="input-row">
-                    <input type="number" id="office_base" min="0" placeholder="0">
-                    <select id="unit_office">
-                        <option value="1">€ (Euros)</option>
-                        <option value="1.08">$ (USD)</option>
-                    </select>
+                <div class="tips-box">
+                    <strong>💡 Cómo reducir:</strong> Instalar difusores en grifos, revisar fugas periódicamente y concienciación del alumnado.
                 </div>
                 <div class="reduction-options">
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Política "Solo Digital" (Ahorro papel)</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Sistema de recarga de marcadores</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.20"> Doble Descarga y Aireadores</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Reciclaje Aguas Grises</label>
                 </div>
-                <div class="res-box" id="res_office">Calculando...</div>
+                <div class="chart-container"><canvas id="chart_water"></canvas></div>
+                <div class="res-box">Esperando datos...</div>
             </div>
 
-            <div class="card" data-type="cleaning">
-                <h2>🧹 Cleaning Products</h2>
+            <div class="card" id="card_office">
+                <h2>📎 Consumibles de Oficina</h2>
+                <select class="period-select">
+                    <option value="12">Próximo Año (12 meses)</option>
+                    <option value="10">Período Escolar (Sept-Jun, 10 meses)</option>
+                </select>
                 <div class="input-row">
-                    <input type="number" id="clean_base" min="0" placeholder="0">
-                    <select id="unit_clean">
-                        <option value="1">€ (Euros)</option>
-                    </select>
+                    <input type="number" class="base-input" min="0" placeholder="Gasto mensual">
+                    <div class="unit-static">€ (Euros)</div>
+                    <input type="hidden" class="unit-select" value="1">
+                </div>
+                <div class="tips-box">
+                    <strong>💡 Cómo reducir:</strong> Fomentar entregas digitales, imprimir a doble cara y reutilizar material.
+                </div>
+                <div class="reduction-options">
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Política "Cero Papel"</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Recarga de marcadores</label>
+                </div>
+                <div class="chart-container"><canvas id="chart_office"></canvas></div>
+                <div class="res-box">Esperando datos...</div>
+            </div>
+
+            <div class="card" id="card_clean">
+                <h2>🧹 Productos de Limpieza</h2>
+                <select class="period-select">
+                    <option value="12">Próximo Año (12 meses)</option>
+                    <option value="10">Período Escolar (Sept-Jun, 10 meses)</option>
+                </select>
+                <div class="input-row">
+                    <input type="number" class="base-input" min="0" placeholder="Gasto mensual">
+                    <div class="unit-static">€ (Euros)</div>
+                    <input type="hidden" class="unit-select" value="1">
+                </div>
+                <div class="tips-box">
+                    <strong>💡 Cómo reducir:</strong> Comprar a granel (eco-bulk), usar concentrados y optimizar dosis.
                 </div>
                 <div class="reduction-options">
                     <label><input type="checkbox" class="reduce-check" data-impact="0.15"> Dilución de concentrados</label>
-                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Compra Eco-Bulk (Granel)</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Compra Granel (Eco-Bulk)</label>
                 </div>
-                <div class="res-box" id="res_clean">Calculando...</div>
+                <div class="chart-container"><canvas id="chart_clean"></canvas></div>
+                <div class="res-box">Esperando datos...</div>
             </div>
 
         </div>
 
         <section class="reduction-plan full-width">
-            <h2>Roadmap de Sostenibilidad a 3 años (Objetivo -30%)</h2>
-            <div class="plan-layout">
-                <div class="plan-details">
-                    <table class="plan-table">
-                        <thead>
-                            <tr>
-                                <th>Año</th>
-                                <th>Objetivo Mensurable</th>
-                                <th>Acción Concreta</th>
-                                <th>KPI (Reducción)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="plan-body">
-                            </tbody>
-                    </table>
-                </div>
-                <div class="chart-container">
-                    <canvas id="reductionChart"></canvas>
-                </div>
+            <h2>Cronograma de Reducción a 3 años (-30% Objetivo)</h2>
+            <div class="plan-details">
+                <table class="plan-table">
+                    <thead>
+                        <tr>
+                            <th>Año</th>
+                            <th>Objetivo Mesurable</th>
+                            <th>Acciones Concretas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="plan-body">
+                        <tr>
+                            <td>Año 1</td>
+                            <td>Reducción del 10% del impacto</td>
+                            <td>Instalación de LED, aireadores y política digital básica.</td>
+                        </tr>
+                        <tr>
+                            <td>Año 2</td>
+                            <td>Reducción acumulada del 20%</td>
+                            <td>Compra a granel, termostatos y recarga de consumibles.</td>
+                        </tr>
+                        <tr>
+                            <td>Año 3</td>
+                            <td>Reducción acumulada del 30%</td>
+                            <td>Placas solares y reciclaje de aguas grises (Economía circular).</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </section>
 

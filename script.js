@@ -1,160 +1,143 @@
-let myChart;
+// Almacenar las instancias de los gráficos
+const charts = {};
 
-// 1. CARGA DE DATOS DESDE data.json
-async function loadRealData() {
-    try {
-        const response = await fetch('data.json');
-        if (!response.ok) throw new Error("No se pudo cargar el archivo data.json");
-        const data = await response.json();
+// Configuración inicial de los 4 gráficos
+const chartConfigs = [
+    { id: 'card_elect', canvasId: 'chart_elect', label: 'Proyección Eléctrica' },
+    { id: 'card_water', canvasId: 'chart_water', label: 'Proyección de Agua' },
+    { id: 'card_office', canvasId: 'chart_office', label: 'Proyección Consumibles' },
+    { id: 'card_clean', canvasId: 'chart_clean', label: 'Proyección Limpieza' }
+];
 
-        // --- Procesamiento de Electricidad ---
-        const avgElect = data.electricity_generation.reduce((acc, c) => acc + c.consumption_kWh, 0) / data.electricity_generation.length;
+function initCharts() {
+    // 1. Obtener el año actual dinámicamente
+    const currentYear = new Date().getFullYear();
 
-        // --- Procesamiento de Agua (Liters -> m3) ---
-        const avgWaterLiters = data.water_consumption_daily.reduce((acc, c) => acc + c.total_liters, 0) / data.water_consumption_daily.length;
-        const avgWaterM3 = avgWaterLiters / 1000;
+    // 2. Crear los textos para el eje X de los gráficos
+    const dynamicLabels = [
+        'Actual',
+        (currentYear + 1).toString(),
+        (currentYear + 2).toString(),
+        (currentYear + 3).toString()
+    ];
 
-        // --- Procesamiento de Consumibles (Oficina y Limpieza) ---
-        const totalOffice = data.office_consumables.reduce((acc, c) => acc + c.total_price, 0);
-        const totalClean = data.cleaning_consumables.reduce((acc, c) => acc + c.total_price, 0);
+    chartConfigs.forEach(config => {
+        const ctx = document.getElementById(config.canvasId).getContext('2d');
+        charts[config.id] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: dynamicLabels, // Aplicamos las etiquetas dinámicas aquí
+                datasets: [{
+                    label: config.label,
+                    data: [0, 0, 0, 0],
+                    backgroundColor: 'rgba(45, 106, 79, 0.6)',
+                    borderColor: '#1b4332',
+                    borderWidth: 2,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    });
 
-        // Rellenar la interfaz con las medias mensuales calculadas
-        document.getElementById('elect_base').value = (avgElect * 30).toFixed(0);
-        document.getElementById('agua_base').value = (avgWaterM3 * 30).toFixed(1);
-        document.getElementById('office_base').value = (totalOffice / 6).toFixed(2); // Estimación 6 meses de datos
-        document.getElementById('clean_base').value = (totalClean / 6).toFixed(2);
+    // 3. (Extra) Actualizar también la tabla de HTML para que coincida con los gráficos
+    updateTableYears(currentYear);
+}
 
-        // Una vez cargados los datos, calculamos todo por primera vez
-        calculate();
-    } catch (e) {
-        console.error("Error al cargar los datos:", e);
-        // Fallback en caso de error para que la calculadora no esté vacía
-        calculate();
+// Función auxiliar para que la tabla del roadmap muestre también los años reales
+function updateTableYears(currentYear) {
+    const tableRows = document.querySelectorAll('#plan-body tr');
+    // Verificamos que las filas existan antes de cambiarlas
+    if (tableRows.length >= 3) {
+        tableRows[0].cells[0].innerText = currentYear + 1;
+        tableRows[1].cells[0].innerText = currentYear + 2;
+        tableRows[2].cells[0].innerText = currentYear + 3;
     }
 }
 
-// 2. LÓGICA DE CÁLCULO MAESTRA
-function calculate() {
-    // Capturar IPC y factores de unidad
+// Cargar datos reales del JSON
+async function loadRealData() {
+    try {
+        const response = await fetch('data.json');
+        if (!response.ok) throw new Error("Error cargando JSON");
+        const data = await response.json();
+
+        // Calcular promedios mensuales
+        const electDaily = data.electricity_generation.reduce((acc, c) => acc + c.consumption_kWh, 0) / data.electricity_generation.length;
+        const waterDaily = data.water_consumption_daily.reduce((acc, c) => acc + c.total_liters, 0) / data.water_consumption_daily.length;
+
+        const totalOffice = data.office_consumables.reduce((acc, c) => acc + c.total_price, 0);
+        const totalClean = data.cleaning_consumables.reduce((acc, c) => acc + c.total_price, 0);
+
+        // Asignar al HTML (multiplicado por 30 para hacer un mes)
+        document.querySelector('#card_elect .base-input').value = (electDaily * 30).toFixed(0);
+        document.querySelector('#card_water .base-input').value = ((waterDaily * 30) / 1000).toFixed(1); // a m3
+        document.querySelector('#card_office .base-input').value = (totalOffice / 6).toFixed(2); // asumiendo 6 meses
+        document.querySelector('#card_clean .base-input').value = (totalClean / 6).toFixed(2);
+
+        calculateAll();
+    } catch (e) {
+        console.error("No se pudo cargar data.json", e);
+        calculateAll(); // Recalcular con lo que haya escrito a mano
+    }
+}
+
+// Lógica principal de cálculo
+function calculateAll() {
     const ipcValue = parseFloat(document.getElementById('ipc').value) || 0;
     const ipcFactor = 1 + (ipcValue / 100);
 
-    // Obtener valores de entrada multiplicados por sus selectores de unidad
-    const vals = {
-        energy: (parseFloat(document.getElementById('elect_base').value) || 0) * parseFloat(document.getElementById('unit_elect').value),
-        water: (parseFloat(document.getElementById('agua_base').value) || 0) * parseFloat(document.getElementById('unit_water').value),
-        office: (parseFloat(document.getElementById('office_base').value) || 0) * parseFloat(document.getElementById('unit_office').value),
-        clean: (parseFloat(document.getElementById('clean_base').value) || 0) * parseFloat(document.getElementById('unit_clean').value)
-    };
+    chartConfigs.forEach(config => {
+        const card = document.getElementById(config.id);
 
-    // Calcular el porcentaje total de reducción basado en los checkboxes (Economía Circular)
-    let totalRedPct = 0;
-    document.querySelectorAll('.reduce-check:checked').forEach(c => {
-        totalRedPct += parseFloat(c.dataset.impact);
-    });
+        // 1. Obtener valores
+        const baseVal = parseFloat(card.querySelector('.base-input').value) || 0;
+        const unitMult = parseFloat(card.querySelector('.unit-select').value) || 1;
+        const months = parseFloat(card.querySelector('.period-select').value) || 12;
 
-    // Consumo Mensual y Anual
-    const monthlyTotal = vals.energy + vals.water + vals.office + vals.clean;
-    const currentAnnualTotal = monthlyTotal * 12;
-    const targetAnnualTotal = currentAnnualTotal * (1 - totalRedPct);
+        // 2. Porcentaje de reducción seleccionado en esta tarjeta
+        let reduction = 0;
+        card.querySelectorAll('.reduce-check:checked').forEach(chk => {
+            reduction += parseFloat(chk.dataset.impact);
+        });
 
-    // Actualizar los cuadros de resultados individuales
-    updateResultBoxes(vals);
+        // 3. Cálculos
+        const baseMonthly = baseVal * unitMult;
+        const currentTotal = baseMonthly * months; // Año (x12) o Periodo Escolar (x10)
 
-    // Actualizar el Gráfico y la Tabla con la tendencia IPC
-    updateNaturalChart(currentAnnualTotal, targetAnnualTotal, ipcFactor);
-    updateTimeline(totalRedPct);
-}
+        // Proyección a 3 años aplicando IPC y Reducciones
+        // Año 1: Sufre IPC, se aplica un 30% de las medidas planificadas
+        const year1 = (currentTotal * ipcFactor) * (1 - (reduction * 0.3));
+        // Año 2: Sufre IPC acumulado, se aplica el 60% de las medidas
+        const year2 = (currentTotal * Math.pow(ipcFactor, 2)) * (1 - (reduction * 0.6));
+        // Año 3: Sufre IPC acumulado, se aplica el 100% de las medidas
+        const year3 = (currentTotal * Math.pow(ipcFactor, 3)) * (1 - reduction);
 
-function updateResultBoxes(vals) {
-    document.getElementById('res_elect').innerHTML = `Mensual: <b>${vals.energy.toFixed(2)}</b>`;
-    document.getElementById('res_water').innerHTML = `Mensual: <b>${vals.water.toFixed(2)}</b>`;
-    document.getElementById('res_office').innerHTML = `Mensual: <b>${vals.office.toFixed(2)}</b>`;
-    document.getElementById('res_clean').innerHTML = `Mensual: <b>${vals.clean.toFixed(2)}</b>`;
-}
+        // 4. Actualizar interfaz
+        card.querySelector('.res-box').innerHTML = `Total Proyectado: <b>${currentTotal.toLocaleString()} €</b>`;
 
-// 3. GRÁFICO PRECISO Y NATURAL (Con tendencia IPC inicial)
-function initChart() {
-    const ctx = document.getElementById('reductionChart').getContext('2d');
-    myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Actual', 'Año 1', 'Año 2', 'Año 3'],
-            datasets: [{
-                label: 'Proyección de Gastos (€)',
-                data: [0, 0, 0, 0],
-                borderColor: '#1b4332',
-                backgroundColor: 'rgba(45, 106, 79, 0.1)',
-                fill: true,
-                tension: 0.45, // Crea la curva orgánica
-                pointRadius: 6,
-                pointBackgroundColor: '#1b4332',
-                borderWidth: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: {
-                    beginAtZero: false,
-                    grid: { color: '#f0f0f0' },
-                    ticks: { callback: (v) => v.toLocaleString() + '€' }
-                }
-            }
-        }
+        // 5. Actualizar gráfico específico
+        const chart = charts[config.id];
+        chart.data.datasets[0].data = [currentTotal, year1, year2, year3];
+        chart.update();
     });
 }
 
-function updateNaturalChart(current, target, ipc) {
-    if (!myChart) return;
-
-    // Simulación de curva realista:
-    // Año 1: El coste sube por el IPC, pero se mitiga un poco con medidas iniciales (3%).
-    const year1Cost = current * ipc * 0.97;
-    const totalReductionValue = current - target;
-
-    // Año 2: Las medidas estructurales (placas, reciclaje) ganan a la inflación.
-    const year2Cost = current - (totalReductionValue * 0.60);
-
-    myChart.data.datasets[0].data = [
-        current,      // Punto 0: Hoy
-        year1Cost,    // Punto 1: Subida por IPC vs Ahorro inicial
-        year2Cost,    // Punto 2: Descenso marcado
-        target        // Punto 3: Objetivo final
-    ];
-    myChart.update();
-}
-
-// 4. TABLA DE CRONOGRAMA A 3 AÑOS
-function updateTimeline(pct) {
-    const planBody = document.getElementById('plan-body');
-    const roadmap = [
-        { year: "Año 1", obj: "Auditoría e Inversión", action: "LED y Sensores de flujo", kpi: `-${(pct*30).toFixed(1)}%` },
-        { year: "Año 2", obj: "Economía Circular", action: "Reciclaje de aguas y Solar", kpi: `-${(pct*65).toFixed(1)}%` },
-        { year: "Año 3", obj: "Optimización Total", action: "Bulk Purchase & Residuo 0", kpi: `-${(pct*100).toFixed(1)}%` }
-    ];
-
-    planBody.innerHTML = roadmap.map(r => `
-        <tr>
-            <td>${r.year}</td>
-            <td>${r.obj}</td>
-            <td>${r.action}</td>
-            <td style="color:#1b4332; font-weight:bold">${r.kpi}</td>
-        </tr>
-    `).join('');
-}
-
-// 5. EVENTOS E INICIALIZACIÓN
+// Inicialización y Event Listeners
 window.onload = () => {
-    initChart();
+    initCharts();
     loadRealData();
 };
 
-// Escuchar cambios en cualquier input, select o checkbox
 document.addEventListener('input', (e) => {
-    if (e.target.matches('input, select, .reduce-check')) calculate();
+    if (e.target.matches('.base-input, .unit-select, .period-select, .reduce-check, #ipc')) {
+        calculateAll();
+    }
 });
 
 document.getElementById('loadDefaults').onclick = loadRealData;
