@@ -46,8 +46,8 @@ function initCharts() {
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { stacked: true }, // Apilado activado
-                    y: { stacked: true, beginAtZero: true } // Apilado activado
+                    x: { stacked: true },
+                    y: { stacked: true, beginAtZero: true }
                 }
             }
         });
@@ -59,16 +59,23 @@ function calculateAll() {
     const ipcValue = parseFloat(document.getElementById('ipc').value) || 0;
     const ipcFactor = 1 + (ipcValue / 100);
 
+    let totalReductions = []; // Para calcular la media global después
+
     chartConfigs.forEach(config => {
         const card = document.getElementById(config.id);
         const baseVal = parseFloat(card.querySelector('.base-input').value) || 0;
         const unitMult = parseFloat(card.querySelector('.unit-select').value) || 1;
         const months = parseFloat(card.querySelector('.period-select').value) || 12;
 
-        let reduction = 0;
+        // CÁLCULO MULTIPLICATIVO REALISTA
+        let remaining = 1;
         card.querySelectorAll('.reduce-check:checked').forEach(chk => {
-            reduction += parseFloat(chk.dataset.impact);
+            remaining *= (1 - parseFloat(chk.dataset.impact));
         });
+
+        // El % final real que se reduce en esta tarjeta
+        let reduction = 1 - remaining;
+        totalReductions.push(reduction); // Guardamos para la media global
 
         const currentTotal = baseVal * unitMult * months;
 
@@ -77,7 +84,7 @@ function calculateAll() {
         const rawY2 = currentTotal * Math.pow(ipcFactor, 2);
         const rawY3 = currentTotal * Math.pow(ipcFactor, 3);
 
-        // Calculamos el valor real CON ahorros aplicados
+        // Calculamos el valor real CON ahorros aplicados (el progreso del ahorro en 3 años)
         const year1 = rawY1 * (1 - (reduction * 0.3));
         const year2 = rawY2 * (1 - (reduction * 0.6));
         const year3 = rawY3 * (1 - reduction);
@@ -90,16 +97,42 @@ function calculateAll() {
         card.querySelector('.res-box').innerHTML = `Projected Total: <b>${currentTotal.toLocaleString()} €</b>`;
 
         const chart = charts[config.id];
-        // Dataset 0: El consumo real (barra de color original)
         chart.data.datasets[0].data = [currentTotal, year1, year2, year3];
-        // Dataset 1: El ahorro (barra naranja encima)
         chart.data.datasets[1].data = [0, diff1, diff2, diff3];
-
         chart.update();
     });
+
+    // --- ACTUALIZACIÓN DEL RECUADRO GLOBAL ---
+    if (totalReductions.length === 4) {
+        // Media global (en porcentaje real)
+        let globalReduction = (totalReductions.reduce((a, b) => a + b, 0) / 4) * 100;
+
+        const displayTotal = document.getElementById('total-reduction-value');
+        const progressFill = document.getElementById('progress-fill');
+        const message = document.getElementById('reduction-message');
+
+        if (displayTotal && progressFill && message) {
+            displayTotal.textContent = `-${globalReduction.toFixed(1)}%`;
+
+            let progressPercent = (globalReduction / 30) * 100;
+            if (progressPercent > 100) progressPercent = 100;
+            progressFill.style.width = `${progressPercent}%`;
+
+            if (globalReduction >= 30) {
+                displayTotal.classList.add('goal-reached-text');
+                progressFill.classList.add('goal-reached-bg');
+                message.textContent = "✅ Goal Achieved! You have surpassed the 30% reduction using Circular Economy.";
+                message.style.color = "#10b981";
+            } else {
+                displayTotal.classList.remove('goal-reached-text');
+                progressFill.classList.remove('goal-reached-bg');
+                message.textContent = "Select more measures above to reach the -30% goal in 3 years.";
+                message.style.color = "#4b5563";
+            }
+        }
+    }
 }
 
-// El resto de funciones (updateTableYears, loadRealData, etc.) se mantienen igual que antes
 function updateTableYears(currentYear) {
     const tableRows = document.querySelectorAll('#plan-body tr');
     if (tableRows.length >= 3) {
