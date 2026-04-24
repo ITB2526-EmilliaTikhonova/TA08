@@ -1,166 +1,123 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Energy & Sustainability Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sustainability Dashboard - Grifols Style</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<header>
-    <h1>Energy & Sustainability Calculator</h1>
-    <p>School-year sustainability analysis: electricity, water, office and cleaning consumables, services and CO₂.</p>
-</header>
+    <header class="main-header">
+        <h1>Sustainability Metrics & Projections</h1>
+        <p>Análisis profesional de impacto ambiental y tendencias de consumo basándose en datos reales.</p>
+    </header>
 
-<main>
-    <section class="card">
-        <h2>Global options</h2>
-        <div class="controls">
-            <label>
-                <input type="checkbox" id="applyIPC">
-                Apply IPC (+3% yearly) to monetary projections
-            </label>
-        </div>
-        <div class="controls">
-            <label>
-                <input type="checkbox" id="applySeasonal">
-                Apply seasonal trends and temporal variability
-            </label>
-        </div>
-    </section>
+    <main class="dashboard">
 
-    <!-- ELECTRICITY -->
-    <section id="electricity" class="card">
-        <h2>Electricity Consumption</h2>
+        <section class="config-card full-width">
+            <div class="config-content">
+                <div class="ipc-group">
+                    <label>Ajuste de IPC actual:</label>
+                    <input type="number" id="ipc" value="3.0" step="0.1"> %
+                </div>
+                <button id="loadDefaults" class="btn-secondary">Resetear a datos del JSON</button>
+            </div>
+        </section>
 
-        <div class="controls">
-            <button onclick="calculateElectricityYear()">Projected electricity for next year</button>
-        </div>
+        <div class="calculator-grid">
 
-        <div class="controls">
-            <label>From: <input type="date" id="elecStart" value="2024-09-01"></label>
-            <label>To: <input type="date" id="elecEnd" value="2025-06-30"></label>
-            <button onclick="calculateElectricityPeriod()">Electricity in selected period</button>
-        </div>
+            <div class="card" data-type="energy">
+                <h2>⚡ Energy Consumption</h2>
+                <div class="input-row">
+                    <input type="number" id="elect_base" min="0" placeholder="0">
+                    <select id="unit_elect">
+                        <option value="1">kWh</option>
+                        <option value="0.001">MWh</option>
+                    </select>
+                </div>
+                <div class="reduction-options">
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.15"> Instalación LED (+Placas Solares)</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Termostatos Inteligentes</label>
+                </div>
+                <div class="res-box" id="res_elect">Calculando...</div>
+            </div>
 
-        <div id="electricityResult" class="result"></div>
-    </section>
+            <div class="card" data-type="water">
+                <h2>💧 Water Usage</h2>
+                <div class="input-row">
+                    <input type="number" id="agua_base" min="0" placeholder="0">
+                    <select id="unit_water">
+                        <option value="1">m³</option>
+                        <option value="1000">Litros</option>
+                    </select>
+                </div>
+                <div class="reduction-options">
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.20"> Aireadores y Doble Descarga</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Reciclaje de Aguas Grises</label>
+                </div>
+                <div class="res-box" id="res_water">Calculando...</div>
+            </div>
 
-    <!-- WATER -->
-    <section id="water" class="card">
-        <h2>Water Consumption</h2>
+            <div class="card" data-type="office">
+                <h2>📎 Office Supplies</h2>
+                <div class="input-row">
+                    <input type="number" id="office_base" min="0" placeholder="0">
+                    <select id="unit_office">
+                        <option value="1">€ (Euros)</option>
+                        <option value="1.08">$ (USD)</option>
+                    </select>
+                </div>
+                <div class="reduction-options">
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Política "Solo Digital" (Ahorro papel)</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.05"> Sistema de recarga de marcadores</label>
+                </div>
+                <div class="res-box" id="res_office">Calculando...</div>
+            </div>
 
-        <div class="controls">
-            <button onclick="calculateWaterYear()">Projected water consumption for next year</button>
-        </div>
+            <div class="card" data-type="cleaning">
+                <h2>🧹 Cleaning Products</h2>
+                <div class="input-row">
+                    <input type="number" id="clean_base" min="0" placeholder="0">
+                    <select id="unit_clean">
+                        <option value="1">€ (Euros)</option>
+                    </select>
+                </div>
+                <div class="reduction-options">
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.15"> Dilución de concentrados</label>
+                    <label><input type="checkbox" class="reduce-check" data-impact="0.10"> Compra Eco-Bulk (Granel)</label>
+                </div>
+                <div class="res-box" id="res_clean">Calculando...</div>
+            </div>
 
-        <div class="controls">
-            <label>From: <input type="date" id="waterStart" value="2024-02-25"></label>
-            <label>To: <input type="date" id="waterEnd" value="2024-02-29"></label>
-            <button onclick="calculateWaterPeriod()">Water consumption in selected period</button>
-        </div>
-
-        <div id="waterResult" class="result"></div>
-    </section>
-
-    <!-- OFFICE CONSUMABLES -->
-    <section id="office" class="card">
-        <h2>Office Consumables</h2>
-
-        <div class="controls">
-            <button onclick="calculateOfficeYear()">Projected office consumables for next year</button>
-        </div>
-
-        <div class="controls">
-            <label>From: <input type="date" id="officeStart" value="2024-06-01"></label>
-            <label>To: <input type="date" id="officeEnd" value="2024-12-31"></label>
-            <button onclick="calculateOfficePeriod()">Office consumables in selected period</button>
-        </div>
-
-        <div id="officeResult" class="result"></div>
-    </section>
-
-    <!-- CLEANING CONSUMABLES -->
-    <section id="cleaning" class="card">
-        <h2>Cleaning Consumables</h2>
-
-        <div class="controls">
-            <button onclick="calculateCleaningYear()">Projected cleaning consumables for next year</button>
-        </div>
-
-        <div class="controls">
-            <label>From: <input type="date" id="cleaningStart" value="2024-06-01"></label>
-            <label>To: <input type="date" id="cleaningEnd" value="2024-12-31"></label>
-            <button onclick="calculateCleaningPeriod()">Cleaning consumables in selected period</button>
         </div>
 
-        <div id="cleaningResult" class="result"></div>
-    </section>
+        <section class="reduction-plan full-width">
+            <h2>Roadmap de Sostenibilidad a 3 años (Objetivo -30%)</h2>
+            <div class="plan-layout">
+                <div class="plan-details">
+                    <table class="plan-table">
+                        <thead>
+                            <tr>
+                                <th>Año</th>
+                                <th>Objetivo Mensurable</th>
+                                <th>Acción Concreta</th>
+                                <th>KPI (Reducción)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="plan-body">
+                            </tbody>
+                    </table>
+                </div>
+                <div class="chart-container">
+                    <canvas id="reductionChart"></canvas>
+                </div>
+            </div>
+        </section>
 
-    <!-- SERVICES -->
-    <section id="services" class="card">
-        <h2>Services (Energy & Maintenance)</h2>
+    </main>
 
-        <div class="controls">
-            <button onclick="calculateServicesYear()">Projected services cost for next year</button>
-        </div>
-
-        <div class="controls">
-            <label>From: <input type="date" id="servicesStart" value="2024-01-01"></label>
-            <label>To: <input type="date" id="servicesEnd" value="2024-12-31"></label>
-            <button onclick="calculateServicesPeriod()">Services cost in selected period</button>
-        </div>
-
-        <div id="servicesResult" class="result"></div>
-    </section>
-
-    <!-- CO2 -->
-    <section id="co2" class="card">
-        <h2>Carbon Footprint (Electricity)</h2>
-
-        <div class="controls">
-            <button onclick="calculateCO2()">Estimate yearly CO₂ from electricity</button>
-        </div>
-
-        <div id="co2Result" class="result"></div>
-    </section>
-    <section id="tips" class="card">
-        <h2>How to reduce consumption</h2>
-
-        <h3>Electricity</h3>
-        <ul>
-            <li>Use LED lighting and switch off unused equipment.</li>
-            <li>Adjust heating and cooling setpoints by 1–2 ºC.</li>
-            <li>Schedule high-consumption tasks during daylight to maximize solar use.</li>
-        </ul>
-
-        <h3>Water</h3>
-        <ul>
-            <li>Install aerators on taps and low-flow fixtures.</li>
-            <li>Detect and repair leaks quickly.</li>
-            <li>Reduce irrigation and prioritize native plants.</li>
-        </ul>
-
-        <h3>Office consumables</h3>
-        <ul>
-            <li>Print only when necessary and use double-sided printing.</li>
-            <li>Promote digital documents instead of paper.</li>
-            <li>Reuse scrap paper for drafts and notes.</li>
-        </ul>
-
-        <h3>Cleaning consumables & services</h3>
-        <ul>
-            <li>Use concentrated and eco-labelled cleaning products.</li>
-            <li>Optimize cleaning schedules based on real occupancy.</li>
-            <li>Plan preventive maintenance to avoid inefficient equipment.</li>
-        </ul>
-    </section>
-</main>
-
-<footer>
-    <p>Projecte de sostenibilitat · Phase 3</p>
-</footer>
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

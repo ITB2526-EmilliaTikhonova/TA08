@@ -1,174 +1,121 @@
-/* =========================================
-   VARIABLES: TEMA "FRESH TECH" V2
-   ========================================= */
+/* Importar tipografía moderna similar a la corporativa */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
 :root {
-  /* Tu nueva paleta exacta */
-  --cyan-main: #79FCF5;
-  --blue-soft: #ABE4FF;    /* <-- Tu nuevo color actualizado */
-  --bg-ice: #E8F8FF;
-  --bg-soft: #E8F0FC;
-  --white: #FFFFFF;
-  --black: #0f172a; /* Negro azulado para máxima elegancia y legibilidad */
-
-  /* Colores derivados para estructura */
-  --text-muted: #475569;
-
-  /* Tipografía y formas */
-  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --container-width: 1100px;
-  --radius: 16px;
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* =========================================
-   BASE & ESTRUCTURA
-   ========================================= */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    --primary-green: #2d5a27;       /* Verde oscuro corporativo */
+    --accent-green: #4caf50;        /* Verde vibrante para acciones */
+    --light-green: #f1f8e9;         /* Fondo muy suave */
+    --text-dark: #333333;           /* Gris casi negro para lectura */
+    --border-color: #e0e0e0;        /* Gris suave para bordes */
+    --bg-body: #ffffff;             /* Fondo blanco puro (estilo Grifols) */
 }
 
 body {
-  background-color: var(--bg-ice);
-  color: var(--black);
-  font-family: var(--font-main);
-  line-height: 1.6;
-  padding: 4rem 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  -webkit-font-smoothing: antialiased;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-dark);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
 }
 
-/* =========================================
-   HEADER
-   ========================================= */
-header {
-  width: 100%;
-  max-width: var(--container-width);
-  margin-bottom: 4rem;
-  text-align: center;
+/* Contenedor principal centrado y limpio */
+.container, main {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
 }
 
+/* Encabezados estilo institucional */
 h1 {
-  font-size: 3.5rem;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  color: var(--black);
-  margin-bottom: 0.5rem;
+    color: var(--primary-green);
+    font-weight: 700;
+    font-size: 2.2rem;
+    border-bottom: 2px solid var(--primary-green);
+    padding-bottom: 15px;
+    margin-bottom: 30px;
 }
 
-/* Subrayado decorativo ahora fluye del cian a tu nuevo azul suave */
-h1::after {
-  content: '';
-  display: block;
-  width: 80px;
-  height: 6px;
-  background: linear-gradient(90deg, var(--cyan-main), var(--blue-soft));
-  margin: 1rem auto 0;
-  border-radius: 4px;
+h2 {
+    color: var(--primary-green);
+    font-weight: 600;
+    margin-top: 40px;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
 }
 
-.subtitle {
-  font-size: 1.1rem;
-  color: var(--text-muted);
-  font-weight: 400;
+/* Tarjetas (Sections) como las de la web de Grifols */
+section, .card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 25px;
+    transition: box-shadow 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-/* =========================================
-   GRID Y TARJETAS
-   ========================================= */
-#container, .grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 2rem;
-  width: 100%;
-  max-width: var(--container-width);
+section:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.card {
-  background: var(--white);
-  border-radius: var(--radius);
-  padding: 2.5rem 2rem;
-  transition: var(--transition);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border: 1px solid var(--white);
-  box-shadow: 0 4px 6px rgba(232, 240, 252, 0.5), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
-  position: relative;
-  overflow: hidden;
+/* Estilo para los inputs y formularios */
+input[type="number"],
+input[type="date"],
+select {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
 }
 
-/* Detalle superior en la tarjeta */
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background-color: var(--bg-soft);
-  transition: var(--transition);
+input:focus {
+    outline: none;
+    border-color: var(--accent-green);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
-/* Efecto Hover */
-.card:hover {
-  transform: translateY(-5px);
-  border-color: var(--blue-soft); /* El borde ahora toma tu nuevo color azul */
-  box-shadow: 0 20px 25px -5px rgba(171, 228, 255, 0.3), 0 10px 10px -5px rgba(121, 252, 245, 0.1);
-}
-
-/* El degradado de la barra superior al hacer hover */
-.card:hover::before {
-  background: linear-gradient(90deg, var(--cyan-main), var(--blue-soft));
-}
-
-.card h2 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-bottom: 0.75rem;
-  letter-spacing: -0.02em;
-}
-
-.card p {
-  font-size: 1rem;
-  color: var(--text-muted);
-  margin-bottom: 2rem;
-}
-
-/* =========================================
-   BOTONES
-   ========================================= */
-button, .btn {
-  /* Gradiente más suave combinando el cian con el azul cielo */
-  background: linear-gradient(135deg, var(--cyan-main), var(--blue-soft));
-  color: var(--black);
-  border: none;
-  padding: 0.8rem 1.8rem;
-  font-size: 0.95rem;
-  font-weight: 700;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: var(--transition);
-  display: inline-block;
-  width: fit-content;
-  box-shadow: 0 4px 10px rgba(171, 228, 255, 0.5); /* Sombra adaptada al nuevo azul */
+/* Botones con estilo profesional */
+button {
+    background-color: var(--primary-green);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: background 0.3s;
 }
 
 button:hover {
-  background: var(--black);
-  color: var(--cyan-main);
-  box-shadow: 0 6px 15px rgba(15, 23, 42, 0.2);
-  transform: translateY(-2px);
+    background-color: var(--accent-green);
 }
 
-/* =========================================
-   RESPONSIVE
-   ========================================= */
-@media (max-width: 600px) {
-  h1 { font-size: 2.5rem; }
-  body { padding: 2rem 1.5rem; }
-  .card { padding: 1.5rem; }
+/* Lista de consejos (How to reduce consumption) */
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+ul li {
+    background-color: var(--light-green);
+    margin-bottom: 10px;
+    padding: 12px 15px;
+    border-left: 4px solid var(--primary-green);
+    border-radius: 0 4px 4px 0;
+}
+
+/* Footer sutil */
+footer {
+    text-align: center;
+    padding: 40px 0;
+    color: #888;
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: 50px;
 }

@@ -1,307 +1,160 @@
-let data = null;
+let myChart;
 
-fetch("data.json")
-  .then(response => response.json())
-  .then(json => {
-      data = json;
-      console.log("Data loaded");
-  })
-  .catch(err => console.error("Error loading data.json", err));
+// 1. CARGA DE DATOS DESDE data.json
+async function loadRealData() {
+    try {
+        const response = await fetch('data.json');
+        if (!response.ok) throw new Error("No se pudo cargar el archivo data.json");
+        const data = await response.json();
 
-function isIPCEnabled() {
-    return document.getElementById("applyIPC")?.checked;
+        // --- Procesamiento de Electricidad ---
+        const avgElect = data.electricity_generation.reduce((acc, c) => acc + c.consumption_kWh, 0) / data.electricity_generation.length;
+
+        // --- Procesamiento de Agua (Liters -> m3) ---
+        const avgWaterLiters = data.water_consumption_daily.reduce((acc, c) => acc + c.total_liters, 0) / data.water_consumption_daily.length;
+        const avgWaterM3 = avgWaterLiters / 1000;
+
+        // --- Procesamiento de Consumibles (Oficina y Limpieza) ---
+        const totalOffice = data.office_consumables.reduce((acc, c) => acc + c.total_price, 0);
+        const totalClean = data.cleaning_consumables.reduce((acc, c) => acc + c.total_price, 0);
+
+        // Rellenar la interfaz con las medias mensuales calculadas
+        document.getElementById('elect_base').value = (avgElect * 30).toFixed(0);
+        document.getElementById('agua_base').value = (avgWaterM3 * 30).toFixed(1);
+        document.getElementById('office_base').value = (totalOffice / 6).toFixed(2); // Estimación 6 meses de datos
+        document.getElementById('clean_base').value = (totalClean / 6).toFixed(2);
+
+        // Una vez cargados los datos, calculamos todo por primera vez
+        calculate();
+    } catch (e) {
+        console.error("Error al cargar los datos:", e);
+        // Fallback en caso de error para que la calculadora no esté vacía
+        calculate();
+    }
 }
 
-function isSeasonalEnabled() {
-    return document.getElementById("applySeasonal")?.checked;
+// 2. LÓGICA DE CÁLCULO MAESTRA
+function calculate() {
+    // Capturar IPC y factores de unidad
+    const ipcValue = parseFloat(document.getElementById('ipc').value) || 0;
+    const ipcFactor = 1 + (ipcValue / 100);
+
+    // Obtener valores de entrada multiplicados por sus selectores de unidad
+    const vals = {
+        energy: (parseFloat(document.getElementById('elect_base').value) || 0) * parseFloat(document.getElementById('unit_elect').value),
+        water: (parseFloat(document.getElementById('agua_base').value) || 0) * parseFloat(document.getElementById('unit_water').value),
+        office: (parseFloat(document.getElementById('office_base').value) || 0) * parseFloat(document.getElementById('unit_office').value),
+        clean: (parseFloat(document.getElementById('clean_base').value) || 0) * parseFloat(document.getElementById('unit_clean').value)
+    };
+
+    // Calcular el porcentaje total de reducción basado en los checkboxes (Economía Circular)
+    let totalRedPct = 0;
+    document.querySelectorAll('.reduce-check:checked').forEach(c => {
+        totalRedPct += parseFloat(c.dataset.impact);
+    });
+
+    // Consumo Mensual y Anual
+    const monthlyTotal = vals.energy + vals.water + vals.office + vals.clean;
+    const currentAnnualTotal = monthlyTotal * 12;
+    const targetAnnualTotal = currentAnnualTotal * (1 - totalRedPct);
+
+    // Actualizar los cuadros de resultados individuales
+    updateResultBoxes(vals);
+
+    // Actualizar el Gráfico y la Tabla con la tendencia IPC
+    updateNaturalChart(currentAnnualTotal, targetAnnualTotal, ipcFactor);
+    updateTimeline(totalRedPct);
 }
 
-// Simple seasonal factors by month (0 = January, 11 = December)
-const seasonalFactors = {
-    electricity: [1.15, 1.10, 1.05, 0.95, 0.90, 0.90, 0.88, 0.90, 0.95, 1.00, 1.05, 1.10],
-    water:       [0.85, 0.85, 0.90, 0.95, 1.00, 1.10, 1.20, 1.20, 1.05, 0.95, 0.90, 0.85],
-    office:      [1.10, 1.05, 1.00, 1.00, 1.10, 1.15, 0.80, 0.80, 1.15, 1.10, 1.05, 0.90],
-    cleaning:    [1.00, 1.00, 1.05, 1.05, 1.10, 1.10, 1.05, 1.05, 1.00, 1.00, 1.00, 1.00]
+function updateResultBoxes(vals) {
+    document.getElementById('res_elect').innerHTML = `Mensual: <b>${vals.energy.toFixed(2)}</b>`;
+    document.getElementById('res_water').innerHTML = `Mensual: <b>${vals.water.toFixed(2)}</b>`;
+    document.getElementById('res_office').innerHTML = `Mensual: <b>${vals.office.toFixed(2)}</b>`;
+    document.getElementById('res_clean').innerHTML = `Mensual: <b>${vals.clean.toFixed(2)}</b>`;
+}
+
+// 3. GRÁFICO PRECISO Y NATURAL (Con tendencia IPC inicial)
+function initChart() {
+    const ctx = document.getElementById('reductionChart').getContext('2d');
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Actual', 'Año 1', 'Año 2', 'Año 3'],
+            datasets: [{
+                label: 'Proyección de Gastos (€)',
+                data: [0, 0, 0, 0],
+                borderColor: '#1b4332',
+                backgroundColor: 'rgba(45, 106, 79, 0.1)',
+                fill: true,
+                tension: 0.45, // Crea la curva orgánica
+                pointRadius: 6,
+                pointBackgroundColor: '#1b4332',
+                borderWidth: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    grid: { color: '#f0f0f0' },
+                    ticks: { callback: (v) => v.toLocaleString() + '€' }
+                }
+            }
+        }
+    });
+}
+
+function updateNaturalChart(current, target, ipc) {
+    if (!myChart) return;
+
+    // Simulación de curva realista:
+    // Año 1: El coste sube por el IPC, pero se mitiga un poco con medidas iniciales (3%).
+    const year1Cost = current * ipc * 0.97;
+    const totalReductionValue = current - target;
+
+    // Año 2: Las medidas estructurales (placas, reciclaje) ganan a la inflación.
+    const year2Cost = current - (totalReductionValue * 0.60);
+
+    myChart.data.datasets[0].data = [
+        current,      // Punto 0: Hoy
+        year1Cost,    // Punto 1: Subida por IPC vs Ahorro inicial
+        year2Cost,    // Punto 2: Descenso marcado
+        target        // Punto 3: Objetivo final
+    ];
+    myChart.update();
+}
+
+// 4. TABLA DE CRONOGRAMA A 3 AÑOS
+function updateTimeline(pct) {
+    const planBody = document.getElementById('plan-body');
+    const roadmap = [
+        { year: "Año 1", obj: "Auditoría e Inversión", action: "LED y Sensores de flujo", kpi: `-${(pct*30).toFixed(1)}%` },
+        { year: "Año 2", obj: "Economía Circular", action: "Reciclaje de aguas y Solar", kpi: `-${(pct*65).toFixed(1)}%` },
+        { year: "Año 3", obj: "Optimización Total", action: "Bulk Purchase & Residuo 0", kpi: `-${(pct*100).toFixed(1)}%` }
+    ];
+
+    planBody.innerHTML = roadmap.map(r => `
+        <tr>
+            <td>${r.year}</td>
+            <td>${r.obj}</td>
+            <td>${r.action}</td>
+            <td style="color:#1b4332; font-weight:bold">${r.kpi}</td>
+        </tr>
+    `).join('');
+}
+
+// 5. EVENTOS E INICIALIZACIÓN
+window.onload = () => {
+    initChart();
+    loadRealData();
 };
 
-function averageFactor(key) {
-    const arr = seasonalFactors[key];
-    return arr.reduce((s, v) => s + v, 0) / arr.length;
-}
-
-function applyIPCToAmount(amount, years = 1) {
-    if (!isIPCEnabled()) return amount;
-    return amount * Math.pow(1.03, years);
-}
-
-
-function parseDate(str) {
-    return new Date(str);
-}
-
-// ---------- ELECTRICITY ----------
-
-// 1) Projected electricity consumption for next year
-function calculateElectricityYear() {
-    if (!data) return;
-
-    const arr = data.electricity_generation;
-    const days = arr.length;
-
-    const total = arr.reduce((sum, d) => sum + d.consumption_kWh, 0);
-    const avgDaily = total / days;
-
-    let projectedYear = avgDaily * 365;
-
-    if (isSeasonalEnabled()) {
-        const factor = averageFactor("electricity");
-        projectedYear *= factor;
-    }
-
-    document.getElementById("electricityResult").innerHTML =
-        `<p><strong>Projected yearly electricity consumption:</strong> ${projectedYear.toFixed(2)} kWh</p>
-         <p>Based on an average of ${avgDaily.toFixed(2)} kWh/day.</p>`;
-}
-
-// 2) Electricity consumption in a selected period
-function calculateElectricityPeriod() {
-    if (!data) return;
-
-    const startStr = document.getElementById("elecStart").value;
-    const endStr = document.getElementById("elecEnd").value;
-    const start = parseDate(startStr);
-    const end = parseDate(endStr);
-
-    const filtered = data.electricity_generation.filter(d => {
-        const date = parseDate(d.date);
-        return date >= start && date <= end;
-    });
-
-    if (filtered.length === 0) {
-        document.getElementById("electricityResult").innerHTML =
-            `<p>No electricity data in this period.</p>`;
-        return;
-    }
-
-    const total = filtered.reduce((sum, d) => sum + d.consumption_kWh, 0);
-    const avgDaily = total / filtered.length;
-
-    document.getElementById("electricityResult").innerHTML =
-        `<p><strong>Electricity consumption in selected period:</strong> ${total.toFixed(2)} kWh</p>
-         <p>Average daily consumption: ${avgDaily.toFixed(2)} kWh/day.</p>`;
-}
-
-// ---------- WATER ----------
-
-// 3) Projected water consumption for next year
-function calculateWaterYear() {
-    if (!data) return;
-
-    const arr = data.water_consumption_daily;
-    const days = arr.length;
-
-    const total = arr.reduce((sum, d) => sum + d.total_liters, 0);
-    const avgDaily = total / days;
-
-    let projectedYear = avgDaily * 365;
-
-    if (isSeasonalEnabled()) {
-        const factor = averageFactor("water");
-        projectedYear *= factor;
-    }
-
-    document.getElementById("waterResult").innerHTML =
-        `<p><strong>Projected yearly water consumption:</strong> ${projectedYear.toFixed(0)} L</p>
-         <p>Based on an average of ${avgDaily.toFixed(0)} L/day.</p>`;
-}
-
-// 4) Water consumption in a selected period
-function calculateWaterPeriod() {
-    if (!data) return;
-
-    const startStr = document.getElementById("waterStart").value;
-    const endStr = document.getElementById("waterEnd").value;
-    const start = parseDate(startStr);
-    const end = parseDate(endStr);
-
-    const filtered = data.water_consumption_daily.filter(d => {
-        const date = parseDate(d.date);
-        return date >= start && date <= end;
-    });
-
-    if (filtered.length === 0) {
-        document.getElementById("waterResult").innerHTML =
-            `<p>No water data in this period.</p>`;
-        return;
-    }
-
-    const total = filtered.reduce((sum, d) => sum + d.total_liters, 0);
-    const avgDaily = total / filtered.length;
-
-    document.getElementById("waterResult").innerHTML =
-        `<p><strong>Water consumption in selected period:</strong> ${total.toFixed(0)} L</p>
-         <p>Average daily consumption: ${avgDaily.toFixed(0)} L/day.</p>`;
-}
-
-// ---------- OFFICE CONSUMABLES ----------
-
-// 5) Projected office consumables for next year (cost + units)
-function calculateOfficeYear() {
-    if (!data) return;
-
-    const arr = data.office_consumables;
-
-    const totalCost = arr.reduce((sum, d) => sum + d.total_price, 0);
-    const totalUnits = arr.reduce((sum, d) => sum + d.quantity, 0);
-
-    const factorSeasonal = isSeasonalEnabled() ? averageFactor("office") : 1;
-    const baseProjectionCost = totalCost * factorSeasonal * (365 / 180);
-    const projectedCost = applyIPCToAmount(baseProjectionCost, 1);
-
-    const projectedUnits = totalUnits * factorSeasonal * (365 / 180);
-
-    document.getElementById("officeResult").innerHTML =
-        `<p><strong>Projected yearly office consumables cost:</strong> ${projectedCost.toFixed(2)} €</p>
-         <p><strong>Projected yearly office consumables units:</strong> ${projectedUnits.toFixed(0)} units</p>`;
-}
-
-
-// 6) Office consumables in a selected period
-function calculateOfficePeriod() {
-    if (!data) return;
-
-    const startStr = document.getElementById("officeStart").value;
-    const endStr = document.getElementById("officeEnd").value;
-    const start = parseDate(startStr);
-    const end = parseDate(endStr);
-
-    const filtered = data.office_consumables.filter(d => {
-        const date = parseDate(d.date);
-        return date >= start && date <= end;
-    });
-
-    if (filtered.length === 0) {
-        document.getElementById("officeResult").innerHTML =
-            `<p>No office consumables in this period.</p>`;
-        return;
-    }
-
-    const totalCost = filtered.reduce((sum, d) => sum + d.total_price, 0);
-    const totalUnits = filtered.reduce((sum, d) => sum + d.quantity, 0);
-
-    document.getElementById("officeResult").innerHTML =
-        `<p><strong>Office consumables cost in selected period:</strong> ${totalCost.toFixed(2)} €</p>
-         <p><strong>Office consumables units in selected period:</strong> ${totalUnits.toFixed(0)} units</p>`;
-}
-
-// ---------- CLEANING CONSUMABLES ----------
-
-// 7) Projected cleaning consumables for next year
-function calculateCleaningYear() {
-    if (!data) return;
-
-    const arr = data.cleaning_consumables;
-
-    const totalCost = arr.reduce((sum, d) => sum + d.total_price, 0);
-    const totalUnits = arr.reduce((sum, d) => sum + d.quantity, 0);
-
-    const factorSeasonal = isSeasonalEnabled() ? averageFactor("cleaning") : 1;
-    const baseProjectionCost = totalCost * factorSeasonal * (365 / 180);
-    const projectedCost = applyIPCToAmount(baseProjectionCost, 1);
-
-    const projectedUnits = totalUnits * factorSeasonal * (365 / 180);
-
-    document.getElementById("cleaningResult").innerHTML =
-        `<p><strong>Projected yearly cleaning consumables cost:</strong> ${projectedCost.toFixed(2)} €</p>
-         <p><strong>Projected yearly cleaning consumables units:</strong> ${projectedUnits.toFixed(0)} units</p>`;
-}
-
-
-// 8) Cleaning consumables in a selected period
-function calculateCleaningPeriod() {
-    if (!data) return;
-
-    const startStr = document.getElementById("cleaningStart").value;
-    const endStr = document.getElementById("cleaningEnd").value;
-    const start = parseDate(startStr);
-    const end = parseDate(endStr);
-
-    const filtered = data.cleaning_consumables.filter(d => {
-        const date = parseDate(d.date);
-        return date >= start && date <= end;
-    });
-
-    if (filtered.length === 0) {
-        document.getElementById("cleaningResult").innerHTML =
-            `<p>No cleaning consumables in this period.</p>`;
-        return;
-    }
-
-    const totalCost = filtered.reduce((sum, d) => sum + d.total_price, 0);
-    const totalUnits = filtered.reduce((sum, d) => sum + d.quantity, 0);
-
-    document.getElementById("cleaningResult").innerHTML =
-        `<p><strong>Cleaning consumables cost in selected period:</strong> ${totalCost.toFixed(2)} €</p>
-         <p><strong>Cleaning consumables units in selected period:</strong> ${totalUnits.toFixed(0)} units</p>`;
-}
-
-// ---------- SERVICES ----------
-
-// 9) Projected services cost for next year
-function calculateServicesYear() {
-    if (!data) return;
-
-    const arr = data.services;
-    const totalCost = arr.reduce((sum, d) => sum + d.total_price, 0);
-
-    const projectedCost = applyIPCToAmount(totalCost, 1);
-
-    document.getElementById("servicesResult").innerHTML =
-        `<p><strong>Projected yearly services cost:</strong> ${projectedCost.toFixed(2)} €</p>`;
-}
-
-
-// 10) Services cost in a selected period
-function calculateServicesPeriod() {
-    if (!data) return;
-
-    const startStr = document.getElementById("servicesStart").value;
-    const endStr = document.getElementById("servicesEnd").value;
-    const start = parseDate(startStr);
-    const end = parseDate(endStr);
-
-    const filtered = data.services.filter(d => {
-        const date = parseDate(d.date);
-        return date >= start && date <= end;
-    });
-
-    if (filtered.length === 0) {
-        document.getElementById("servicesResult").innerHTML =
-            `<p>No services in this period.</p>`;
-        return;
-    }
-
-    const totalCost = filtered.reduce((sum, d) => sum + d.total_price, 0);
-
-    document.getElementById("servicesResult").innerHTML =
-        `<p><strong>Services cost in selected period:</strong> ${totalCost.toFixed(2)} €</p>`;
-}
-
-// ---------- CO2 FROM ELECTRICITY ----------
-
-// 11) CO₂ estimation from yearly electricity consumption
-function calculateCO2() {
-    if (!data) return;
-
-    const arr = data.electricity_generation;
-    const total = arr.reduce((sum, d) => sum + d.consumption_kWh, 0);
-    const avgDaily = total / arr.length;
-    const projectedYear = avgDaily * 365;
-
-    const emissionFactor = 0.231; // kg CO2 per kWh (example)
-    const co2 = projectedYear * emissionFactor;
-
-    document.getElementById("co2Result").innerHTML =
-        `<p><strong>Estimated yearly CO₂ from electricity:</strong> ${co2.toFixed(2)} kg CO₂</p>
-         <p>Based on projected yearly electricity consumption of ${projectedYear.toFixed(2)} kWh.</p>`;
-}
+// Escuchar cambios en cualquier input, select o checkbox
+document.addEventListener('input', (e) => {
+    if (e.target.matches('input, select, .reduce-check')) calculate();
+});
+
+document.getElementById('loadDefaults').onclick = loadRealData;
