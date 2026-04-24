@@ -245,3 +245,28 @@ body {
     color: #666;
     margin-top: 10px;
 }
+
+/* ESTILOS PARA EL NUEVO GRÁFICO GLOBAL */
+.global-chart-section {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    margin-bottom: 40px;
+    border-top: 4px solid var(--primary-green);
+}
+
+.global-chart-section h2 {
+    margin-top: 0;
+    color: var(--primary-green);
+    font-size: 1.4rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.main-chart-container {
+    position: relative;
+    height: 350px;
+    width: 100%;
+}
