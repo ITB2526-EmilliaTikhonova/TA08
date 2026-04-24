@@ -144,7 +144,7 @@ function updateTableYears(currentYear) {
 
 async function loadRealData() {
     try {
-        const response = await fetch('data.json');
+        const response = await fetch('data/data.json');
         if (!response.ok) throw new Error("Error loading JSON");
         const data = await response.json();
         const electDaily = data.electricity_generation.reduce((acc, c) => acc + c.consumption_kWh, 0) / data.electricity_generation.length;
