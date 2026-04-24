@@ -101,11 +101,11 @@ function calculateAll() {
 
 // El resto de funciones (updateTableYears, loadRealData, etc.) se mantienen igual que antes
 function updateTableYears(currentYear) {
-    const tableRows = document.querySelectorAll('#plan-body tr');
-    if (tableRows.length >= 3) {
-        tableRows[0].cells[0].innerText = currentYear + 1;
-        tableRows[1].cells[0].innerText = currentYear + 2;
-        tableRows[2].cells[0].innerText = currentYear + 3;
+    const badges = document.querySelectorAll('.year-badge');
+    if (badges.length >= 3) {
+        badges[0].innerText = currentYear + 1;
+        badges[1].innerText = currentYear + 2;
+        badges[2].innerText = currentYear + 3;
     }
 }
 
