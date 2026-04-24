@@ -95,6 +95,7 @@ function calculateAll() {
     chartConfigs.forEach(config => {
         const card = document.getElementById(config.id);
 
+
         // 1. Obtener valores
         const baseVal = parseFloat(card.querySelector('.base-input').value) || 0;
         const unitMult = parseFloat(card.querySelector('.unit-select').value) || 1;
