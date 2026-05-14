@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sustainability Dashboard - Energy Calculator</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -16,13 +17,39 @@
 
     <main class="dashboard">
 
-        <section class="config-card full-width">
-            <div class="config-content">
+       <section class="config-card full-width">
+            <div class="config-content" style="display: flex; gap: 30px; flex-wrap: wrap; align-items: center;">
                 <div class="ipc-group">
                     <label>📈 Estimated Annual Inflation / CPI:</label>
-                    <input type="number" id="ipc" value="3.0" step="0.1"> %
+                    <input type="number" id="ipc" value="3.0" step="0.1" min="0"> %
+                </div>
+                <div class="kpi-inputs">
+                    <label>👥 Students:</label>
+                    <input type="number" id="students-input" value="500" min="1" style="width: 80px; padding: 8px; border: 1px solid #dee2e6; border-radius: 4px;">
+                </div>
+                <div class="kpi-inputs">
+                    <label>🏫 Area (m²):</label>
+                    <input type="number" id="area-input" value="2000" min="1" style="width: 80px; padding: 8px; border: 1px solid #dee2e6; border-radius: 4px;">
                 </div>
             </div>
+            <div id="kpi-results" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6; width: 100%; display: flex; gap: 30px;">
+                </div>
+        </section>
+
+        <section class="cost-projection full-width" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 30px;">
+            <h2>💰 3-Year Financial Projection (Total Costs)</h2>
+            <table class="plan-table">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Base Cost (with CPI)</th>
+                        <th>Expected Savings</th>
+                        <th>Final Projected Cost</th>
+                    </tr>
+                </thead>
+                <tbody id="cost-projection-body">
+                    </tbody>
+            </table>
         </section>
 
         <div class="calculator-grid">
@@ -157,5 +184,7 @@
     </main>
 
     <script src="js/script.js"></script>
+
+
 </body>
 </html>
