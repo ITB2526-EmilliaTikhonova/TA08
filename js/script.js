@@ -1,25 +1,35 @@
 // Store chart instances
 const charts = {};
+let globalChart; // Tu gráfico global de múltiples líneas
 
 // Color del ahorro (naranja)
 const SAVING_COLOR = 'rgba(255, 159, 64, 0.7)';
 const SAVING_BORDER = '#f39c12';
 
 const chartConfigs = [
-    { id: 'card_elect', canvasId: 'chart_elect', label: 'Electricity', bgColor: 'rgba(255, 206, 86, 0.6)', borderColor: '#d4af37' },
-    { id: 'card_water', canvasId: 'chart_water', label: 'Water', bgColor: 'rgba(54, 162, 235, 0.6)', borderColor: '#2980b9' },
-    { id: 'card_office', canvasId: 'chart_office', label: 'Supplies', bgColor: 'rgba(255, 99, 132, 0.6)', borderColor: '#c0392b' },
-    { id: 'card_clean', canvasId: 'chart_clean', label: 'Cleaning', bgColor: 'rgba(45, 106, 79, 0.6)', borderColor: '#1b4332' }
+    { id: 'card_elect', canvasId: 'chart_elect', label: 'Electricity', bgColor: 'rgba(255, 206, 86, 0.2)', borderColor: '#d4af37' },
+    { id: 'card_water', canvasId: 'chart_water', label: 'Water', bgColor: 'rgba(54, 162, 235, 0.2)', borderColor: '#2980b9' },
+    { id: 'card_office', canvasId: 'chart_office', label: 'Supplies', bgColor: 'rgba(255, 99, 132, 0.2)', borderColor: '#c0392b' },
+    { id: 'card_clean', canvasId: 'chart_clean', label: 'Cleaning', bgColor: 'rgba(45, 106, 79, 0.2)', borderColor: '#1b4332' }
 ];
 
-// Precios estimados para convertir consumo físico a Euros (puedes ajustarlos)
-const PRICE_KWH = 0.16; // 0.16 € por kWh
-const PRICE_M3 = 2.10;  // 2.10 € por m³
+// Precios estimados para convertir consumo físico a Euros
+const PRICE_KWH = 0.16;
+const PRICE_M3 = 2.10;
+
+// FACTORES DE ESTACIONALIDAD (0 = Enero, 11 = Diciembre)
+const seasonalityFactors = {
+    'Electricity': [1.2, 1.1, 1.0, 0.9, 0.9, 0.8, 0.2, 0.2, 0.9, 1.0, 1.1, 1.2],
+    'Water':       [0.9, 0.9, 1.0, 1.0, 1.1, 1.2, 0.4, 0.4, 1.0, 1.0, 0.9, 0.9],
+    'Supplies':    [0.9, 0.9, 0.9, 0.9, 0.9, 0.6, 0.1, 0.1, 1.6, 1.0, 0.9, 0.9],
+    'Cleaning':    [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.6, 0.8, 1.2, 1.0, 1.0, 1.0]
+};
 
 function initCharts() {
     const currentYear = new Date().getFullYear();
     const dynamicLabels = ['Current', (currentYear + 1).toString(), (currentYear + 2).toString(), (currentYear + 3).toString()];
 
+    // 1. Inicializar los gráficos de barras individuales
     chartConfigs.forEach(config => {
         const ctx = document.getElementById(config.canvasId).getContext('2d');
         charts[config.id] = new Chart(ctx, {
@@ -30,7 +40,7 @@ function initCharts() {
                     {
                         label: 'Projected Consumption',
                         data: [0, 0, 0, 0],
-                        backgroundColor: config.bgColor,
+                        backgroundColor: config.bgColor.replace('0.2', '0.6'),
                         borderColor: config.borderColor,
                         borderWidth: 2,
                         borderRadius: 4
@@ -56,23 +66,92 @@ function initCharts() {
             }
         });
     });
+
+    // 2. Generar etiquetas de los próximos 12 meses
+    const monthNames = ["gen.", "febr.", "març", "abr.", "maig", "juny", "jul.", "ag.", "set.", "oct.", "nov.", "des."];
+    const currentMonth = new Date().getMonth();
+    let monthlyLabels = [];
+    for (let i = 0; i < 12; i++) {
+        let m = (currentMonth + i) % 12;
+        let y = currentYear + Math.floor((currentMonth + i) / 12);
+        monthlyLabels.push(`${monthNames[m]} '${y.toString().slice(-2)}`);
+    }
+
+    // 3. INICIALIZAR EL GRÁFICO DE LÍNEAS GLOBAL
+    const ctxGlobal = document.getElementById('global_projection_chart');
+    if (ctxGlobal) {
+        globalChart = new Chart(ctxGlobal.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: monthlyLabels,
+                datasets: chartConfigs.map(config => ({
+                    label: config.label,
+                    data: Array(12).fill(0),
+                    yAxisID: config.id === 'card_elect' ? 'y' : 'y1',
+                    borderColor: config.borderColor,
+                    backgroundColor: config.bgColor,
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }))
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        beginAtZero: true,
+                        title: { display: true, text: 'Electricidad (€)' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        beginAtZero: true,
+                        title: { display: true, text: 'Agua, Material y Limpieza (€)' },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+    }
+
     updateTableYears(currentYear);
 }
 
 function calculateAll() {
     const ipcValue = parseFloat(document.getElementById('ipc').value) || 0;
     const ipcFactor = 1 + (ipcValue / 100);
+    const ipcMonthlyRate = (ipcValue / 100) / 12;
 
     let totalReductions = [];
     let globalCostEuros = 0;
     let totalKwhForKPI = 0;
     let totalLitersForKPI = 0;
+    const currentMonth = new Date().getMonth();
 
-    chartConfigs.forEach(config => {
+    chartConfigs.forEach((config, index) => {
         const card = document.getElementById(config.id);
+        if (!card) return;
+
         const baseVal = parseFloat(card.querySelector('.base-input').value) || 0;
         const unitMult = parseFloat(card.querySelector('.unit-select').value) || 1;
-        const months = parseFloat(card.querySelector('.period-select').value) || 12;
+        const months = parseFloat(card.querySelector('.period-select') ? card.querySelector('.period-select').value : 12) || 12;
 
         let remaining = 1;
         card.querySelectorAll('.reduce-check:checked').forEach(chk => {
@@ -81,13 +160,15 @@ function calculateAll() {
 
         let reduction = 1 - remaining;
         totalReductions.push(reduction);
-        card.querySelector('.cat-perc').textContent = `-${(reduction * 100).toFixed(1)}%`;
+
+        const catPercEl = card.querySelector('.cat-perc');
+        if(catPercEl) catPercEl.textContent = `-${(reduction * 100).toFixed(1)}%`;
 
         const currentTotal = baseVal * unitMult * months;
         let costInEuros = 0;
         let unitLabel = "€";
 
-        // Ajuste según categoría para separar físicas de monetarias
+        // Convertir unidades a Euros para las gráficas
         if (config.id === 'card_elect') {
             totalKwhForKPI = currentTotal;
             costInEuros = currentTotal * PRICE_KWH;
@@ -103,6 +184,7 @@ function calculateAll() {
 
         globalCostEuros += costInEuros;
 
+        // --- CÁLCULO PARA GRÁFICOS DE BARRAS (3 AÑOS) ---
         const rawY1 = currentTotal * ipcFactor;
         const rawY2 = currentTotal * Math.pow(ipcFactor, 2);
         const rawY3 = currentTotal * Math.pow(ipcFactor, 3);
@@ -115,15 +197,40 @@ function calculateAll() {
         const diff2 = rawY2 - year2;
         const diff3 = rawY3 - year3;
 
-        // Mostrar valores y actualizar el "Waiting for data..."
-        card.querySelector('.res-box').innerHTML = `Projected Total: <b>${currentTotal.toLocaleString(undefined, {maximumFractionDigits: 2})} ${unitLabel}</b> <br><span style="font-size:0.8rem; font-weight:normal;">(Approx: ${costInEuros.toFixed(2)} €/year)</span>`;
+        const resBox = card.querySelector('.res-box');
+        if(resBox) {
+            resBox.innerHTML = `Projected Total: <b>${currentTotal.toLocaleString(undefined, {maximumFractionDigits: 2})} ${unitLabel}</b> <br><span style="font-size:0.8rem; font-weight:normal;">(Approx: ${costInEuros.toFixed(2)} €/year)</span>`;
+        }
 
-        // Actualizar gráficos
-        const chart = charts[config.id];
-        chart.data.datasets[0].data = [currentTotal, year1, year2, year3];
-        chart.data.datasets[1].data = [0, diff1, diff2, diff3];
-        chart.update();
+        if (charts[config.id]) {
+            const chart = charts[config.id];
+            chart.data.datasets[0].data = [currentTotal, year1, year2, year3];
+            chart.data.datasets[1].data = [0, diff1, diff2, diff3];
+            chart.update();
+        }
+
+        // --- CÁLCULO PARA GRÁFICO DE LÍNEAS GLOBAL (12 MESES CON ESTACIONALIDAD EN EUROS) ---
+        if (globalChart) {
+            let monthlyDataArray = [];
+            let monthlyBaseEuros = costInEuros / months; // Base en euros por mes
+
+            for (let m = 0; m < 12; m++) {
+                let actualMonthIndex = (currentMonth + m) % 12;
+                let seasonalMultiplier = seasonalityFactors[config.label][actualMonthIndex];
+
+                let reductionProgress = reduction * (m / 11); // La reducción se aplica gradualmente
+                let inflationFactor = 1 + (ipcMonthlyRate * m);
+
+                let projectedMonthly = (monthlyBaseEuros * seasonalMultiplier * inflationFactor) * (1 - reductionProgress);
+                monthlyDataArray.push(projectedMonthly);
+            }
+            globalChart.data.datasets[index].data = monthlyDataArray;
+        }
     });
+
+    if (globalChart) {
+        globalChart.update();
+    }
 
     updateGlobalSummary(totalReductions);
     updateKPIs(totalKwhForKPI, totalLitersForKPI);
@@ -131,8 +238,9 @@ function calculateAll() {
 }
 
 function updateGlobalSummary(totalReductions) {
-    if (totalReductions.length !== 4) return;
-    let globalReduction = (totalReductions.reduce((a, b) => a + b, 0) / 4) * 100;
+    if (totalReductions.length === 0) return;
+    let globalReduction = (totalReductions.reduce((a, b) => a + b, 0) / totalReductions.length) * 100;
+
     const displayTotal = document.getElementById('total-reduction-value');
     const progressFill = document.getElementById('progress-fill');
     const message = document.getElementById('reduction-message');
@@ -176,10 +284,9 @@ function updateGlobalCostProjection(baseEuros, ipcValue, reductionsArray) {
     const tbody = document.getElementById('cost-projection-body');
     if (!tbody) return;
 
-    let avgReduction = reductionsArray.reduce((a, b) => a + b, 0) / reductionsArray.length;
+    let avgReduction = reductionsArray.length > 0 ? (reductionsArray.reduce((a, b) => a + b, 0) / reductionsArray.length) : 0;
     let tasa = ipcValue / 100;
     let currentCost = baseEuros;
-
     const phaseIn = [0.33, 0.66, 1.0];
 
     let html = '';
@@ -191,7 +298,7 @@ function updateGlobalCostProjection(baseEuros, ipcValue, reductionsArray) {
 
         html += `
             <tr>
-                <td><strong>Year ${i + 1}</strong></td>
+                <td><strong>Year <span class="year-badge"></span></strong></td>
                 <td>${currentCost.toFixed(2)} €</td>
                 <td style="color: #d35400; font-weight: bold;">-${savingEuros.toFixed(2)} €</td>
                 <td style="font-weight: bold; color: var(--text-main);">${finalCost.toFixed(2)} €</td>
@@ -199,6 +306,7 @@ function updateGlobalCostProjection(baseEuros, ipcValue, reductionsArray) {
         `;
     }
     tbody.innerHTML = html;
+    updateTableYears(new Date().getFullYear());
 }
 
 function updateTableYears(currentYear) {
@@ -226,11 +334,9 @@ async function loadRealData() {
         document.querySelector('#card_office .base-input').value = (totalOffice / 6).toFixed(2);
         document.querySelector('#card_clean .base-input').value = (totalClean / 6).toFixed(2);
 
-        // Ejecutamos calculateAll después de inyectar los datos reales
         calculateAll();
     } catch (e) {
-        console.error("Could not load data.json", e);
-        // Si falla (por ejemplo si no usas un servidor local), ejecuta con los valores por defecto
+        console.error("Could not load data.json. Running with default values.", e);
         calculateAll();
     }
 }
@@ -241,7 +347,6 @@ window.onload = () => {
 };
 
 document.addEventListener('input', (e) => {
-    // Escucha todos los inputs importantes para recalcular automáticamente
     if (e.target.matches('.base-input, .unit-select, .period-select, .reduce-check, #ipc, #students-input, #area-input')) {
         calculateAll();
     }
