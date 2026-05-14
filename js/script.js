@@ -172,3 +172,5 @@ document.addEventListener('input', (e) => {
         calculateAll();
     }
 });
+
+
